@@ -17,4 +17,4 @@ Assignment Number:
 
 Program Description:
 *****************
-Program takes in a Clike file as input and outputs a scheduled and outputs a HLSM in Verilog.
+Program takes in a Clike file as input and outputs a scheduled HLSM in Verilog.
