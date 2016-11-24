@@ -1,7 +1,7 @@
 # Authors: Justin Siekmann, Anthony Ciancio
 # NetIDs: jsiekmann, shjay
-# Date: 25 October, 2016
-# Assignment #2
+# Date: 29 November, 2016
+# Assignment #3
 
 
 set( CMAKE_CXX_FLAGS "-Wall -g" )
@@ -9,5 +9,5 @@ set( CMAKE_CXX_FLAGS "-Wall -g" )
 file( GLOB SRCS *.cpp *.h )
 
 add_definitions(-std=c++11)
-add_executable( dpgen ${SRCS} )
+add_executable( hlsyn ${SRCS} )
 

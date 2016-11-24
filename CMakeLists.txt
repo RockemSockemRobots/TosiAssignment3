@@ -1,11 +1,11 @@
 # Authors: Justin Siekman, Anthony Ciancio
 # NetIDs: jsiekmann, shjay
-# Date: 25 October, 2016
-# Assignment #2
+# Date: 29 November, 2016
+# Assignment #3
 
 cmake_minimum_required(VERSION 3.4.1)
 
-project (dpgen_project)
+project (hlsyn_project)
 
 add_subdirectory( src )
 
