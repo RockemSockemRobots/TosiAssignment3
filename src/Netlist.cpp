@@ -35,13 +35,13 @@ bool Netlist::readIn(std::string inputFile) {
 	int column;
 
 	
-	inFile.open(inputFile);
+	inFile.open(inputFile); //insert empty file logic
 	while (std::getline(inFile,line)) {
 		line.erase(std::remove(line.begin(), line.end(), ','), line.end());
 		std::stringstream line_stream(line);
 		line_stream >> type_word;
 		if (line != "") {
-			if (type_word == "input" || type_word == "output" || type_word == "wire" || type_word == "register") {
+			if (type_word == "input" || type_word == "output" || type_word == "wire" || type_word == "register") { //don't need wire or register. need to add variable
 				line_stream >> sign_size_word;
 				std::size_t pos = sign_size_word.find_first_of("t");
 				std::string sign_word = sign_size_word.substr(0, (pos + 1));
@@ -49,7 +49,7 @@ bool Netlist::readIn(std::string inputFile) {
 				std::string size_word = sign_size_word.substr((pos + 1), sign_size_word.length());
 				while (line_stream >> name_word) {
 					if (type_word == "input") {
-						this->inputs.push_back(new Connector(type_word, sign, size_word, name_word, 0));
+						this->inputs.push_back(new Connector(type_word, sign, size_word, name_word, 0)); //do we need delay?
 					}
 					else if (type_word == "output") {
 						this->outputs.push_back(new Connector(type_word, sign, size_word, name_word, -1));
@@ -64,6 +64,8 @@ bool Netlist::readIn(std::string inputFile) {
 				}
 				type_word = ""; sign_size_word = ""; name_word = ""; pos = 0; sign_word = ""; size_word = "";
 			}
+			//add if statements
+			//add for loops
 			else {
 				//word1 already have as type_word
 				line_stream >> word2;
@@ -77,7 +79,7 @@ bool Netlist::readIn(std::string inputFile) {
 					std::cerr << "Something went wrong: Check netlist";
 					return true;
 				}
-				else if (word4 == "") {
+				else if (word4 == "") { //do we need this??
 					tempInputs = createCompInputs(word3, "Clk", "Rst");
 					tempOutputs = createCompOutputs(word4, type_word);
 					if (tempOutputs.size() == 0) {
@@ -98,8 +100,8 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							tempsize = stoi(tempOutputs.at(0)->get_size());
-							column = find(delayColumn.begin(), delayColumn.end(), tempsize) - delayColumn.begin();
+							tempsize = stoi(tempOutputs.at(0)->get_size()); //size of an operation determined the same way as Ass 2?
+							column = find(delayColumn.begin(), delayColumn.end(), tempsize) - delayColumn.begin(); //don't need?
 							this->logics.push_back(new Logic("ADD", "add" + std::to_string(ADDs), tempInputs, tempOutputs, tempsize, false, delayArray[1][column], ""));
 							ADDs++;
 						}
