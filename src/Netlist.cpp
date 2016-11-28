@@ -6,6 +6,87 @@ Assignment #2
 
 Netlist.cpp
 *****************************************/
+
+/*	ALAP calculation:
+	*****************
+	// note that outputs already have timeALAP
+	latency = latencyInput;
+
+	while (latency > 0) {
+
+		for (i=0; i != logic.size(); i++) {
+			
+			if (logic.at(i)->get_Output()->get_timeALAP() == latency) {
+				logic.at(i)->set_timeALAP() = latency;
+
+				for (j=0; j != logic.at(i)->inputs.size(); j++) {
+					logic.at(i)->get_Inputs.at(j)->set_timeALAP(latency);
+				}
+			}
+			else {
+			}
+		}
+	latency--;
+	}
+
+
+
+
+
+
+
+	Force calculation:
+	******************
+
+	// 1. populate probs_ matrices for addsub, mult, div, log
+			- column 1 stores the vertex number
+	// 2. populate dist_ ""
+			- ""
+	// 3. populate selfForces matrix
+			- if there is a 0 in the probs_ matrix for that slot, set to 0
+			- else, calculate selfForce = dist1*(1/0 - probs)
+	// 4. populate totalForces matrix
+			- pred force = self force of immediate above node(s) that are forced into a time slot
+			- succ force = self force of immediate below node(s) that are forced into a time slot
+			- total force = self + pred + succ
+	// 5. choose the lowest totalForce value
+	// 6. overwrite timeASAP and timeALAP of that node with scheduled time; scheduleFlag = 1
+	// 7. Check scheduleFlags of every node. Repeat 1-6 until every scheduleFlag == 1
+
+*/
+
+/*	NOTES
+	*****
+	- change output vector of a logic piece to just be one output
+	- Logic
+		- timeASAP
+		- timeALAP
+		- inputConnectors (vector)
+		- outputConnectors (vector)
+		- change the delay (from table to standard on logic type)
+		- logicDependency
+	- Connector
+		- timeASAP
+		- timeALAP
+	- State (object/vector)
+		- name
+		- logics (vector)
+		- input transitions (vector)
+		- output transitions (vector)
+	- Transition (object/vector)
+		- name
+		- startState
+		- endState
+		- condition
+	- stateRegister
+	- output Verilog code as states
+	- algorithm to optimize
+		- unscheduled graph
+		- ASAP calculation
+		- ALAP calculation
+		- force directed algorithm
+	- error for latency incompatability
+*/
 #include "Netlist.h"
 
 Netlist::Netlist(std::string inputFile) {
