@@ -27,8 +27,8 @@ class Connector{
 		void set_name(std::string name) { this->name = name; }
 		void set_size(std::string size) { this->size = size; }
 		void set_sign(bool sign) { this->sign = sign; }
-		int set_timeASAP(int timeASAP) { this->timeASAP = timeASAP; }
-		int set_timeALAP(int timeALAP) { this->timeALAP = timeALAP; }
+		void set_timeASAP(int timeASAP) { this->timeASAP = timeASAP; }
+		void set_timeALAP(int timeALAP) { this->timeALAP = timeALAP; }
 	private:
 		std::string type;
 		std::string name;

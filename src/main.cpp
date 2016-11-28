@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) { //arguments: hlsyn(cmd) cFile(input) latency 
 	if (netlist1.get_error()) {
 		return -1;
 	}
+	netlist1.calcTimeALAP();
 	netlist1.writeOut(argv[3]);
 
 	return 0;

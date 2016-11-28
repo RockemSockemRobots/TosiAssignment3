@@ -528,13 +528,34 @@ std::vector<Connector*> Netlist::createCompOutputs(std::string word4, std::strin
 // ***********************************
 // 1. Calculate timeASAP for each node
 //int Netlist::calcTimeASAP(std::vector<Connector*> vector) {
-
+	
 //}
 
 
 
 // 2. Calculate ALAP for each node
-
+bool Netlist::calcTimeALAP() {
+	int layer = this->latency;
+	while (layer > 0) {
+		for (int i = 0; i != (int)this->logics.size(); i++) {
+			if (this->logics.at(i)->get_outputs().at(0)->get_timeALAP() == layer) {
+				this->logics.at(i)->set_timeALAP(layer);
+				this->logics.at(i)->set_schALAP(true);
+				for (int j = 0; j != (int)this->logics.at(i)->get_inputs().size(); j++) {
+					this->logics.at(i)->get_inputs().at(j)->set_timeALAP(layer - this->logics.at(i)->get_delay());
+				}
+			}
+		}
+		layer--;
+	}
+	for (int i = 0; i != (int)this->logics.size(); i++) {
+		if (this->logics.at(i)->get_schALAP() == false) {
+			std::cerr << "Input Latency Insufficient";
+			return false;
+		}
+	}
+	return true;
+}
 
 
 // 3. Populate the resource probability matrix for each resource type
