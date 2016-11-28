@@ -27,6 +27,9 @@ class Logic {
 		std::vector<Connector*> get_outputs() { return this->outputs; }
 		int get_timeASAP() { return this->timeASAP; }
 		int get_timeALAP() { return this->timeALAP; }
+		bool get_schASAP() { return this->schASAP; }
+		bool get_schALAP() { return this->schALAP; }
+		bool get_schForce() { return this->schForce; }
 		//Set
 		void set_type(std::string type) { this->type = type; }
 		void set_name(std::string name) { this->name = name; }
@@ -35,6 +38,9 @@ class Logic {
 		void set_outType(std::string outType) { this->outType = outType; }
 		int set_timeASAP(int timeASAP) { this->timeASAP = timeASAP; }
 		int set_timeALAP(int timeALAP) { this->timeALAP = timeALAP; }
+		bool set_schASAP(bool schASAP) { this->schASAP = schASAP; }
+		bool set_schALAP(bool schALAP) { this->schALAP = schALAP; }
+		bool set_schForce(bool schForce) { this->schForce = schForce; }
 	private:
 		std::string type;
 		std::string name;
@@ -45,6 +51,8 @@ class Logic {
 		std::string outType;
 		int timeASAP;
 		int timeALAP;
-		bool scheduled;
+		bool schASAP;
+		bool schALAP;
+		bool schForce;
 };
 #endif

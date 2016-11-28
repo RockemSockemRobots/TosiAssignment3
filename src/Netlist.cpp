@@ -133,10 +133,10 @@ bool Netlist::readIn(std::string inputFile) {
 						this->inputs.push_back(new Connector(type_word, sign, size_word, name_word, 1, -1)); //do we need delay?
 					}
 					else if (type_word == "output") {
-						this->outputs.push_back(new Connector(type_word, sign, size_word, name_word, -1, this->latency));
+						this->outputs.push_back(new Connector(type_word, sign, size_word, name_word, (this->latency + 1), this->latency));
 					}
 					else if (type_word == "variable") {
-						this->variables.push_back(new Connector(type_word, sign, size_word, name_word, -1, -1));
+						this->variables.push_back(new Connector(type_word, sign, size_word, name_word, (this->latency + 1), -1));
 					}
 				}
 				type_word = ""; sign_size_word = ""; name_word = ""; pos = 0; sign_word = ""; size_word = "";
@@ -527,9 +527,40 @@ std::vector<Connector*> Netlist::createCompOutputs(std::string word4, std::strin
 // FORCE-DIRECTED SCHEDULING ALGORITHM
 // ***********************************
 // 1. Calculate timeASAP for each node
-//int Netlist::calcTimeASAP(std::vector<Connector*> vector) {
+bool Netlist::calcTimeASAP() {
 
-//}
+	int layer = 1;
+
+	// loop until every layer up to latency is scheduled
+	while (layer < this->latency) {
+
+		// check every logic node
+		for (int i = 0; i != (int)this->logics.size(); i++) {
+
+			// check if the node is already scheduled
+			if (this->logics.at(i)->get_schASAP = false) {
+
+				// if not scheduled yet, check if all inputs to that logic are <= layer
+				for (int j = 0; j != this->logics.at(i)->get_inputs().size(); j++) {
+					if (this->logics.at(i)->get_inputs().at(j)->get_timeASAP() <= layer) {
+						
+						// schedule the node, set the schASAP flag
+
+					}
+				}
+			}
+		}
+		layer++;
+	}
+
+	// when done, check that every node has been scheduled
+	// else, return error
+	for (int i = 0; i != (int)this->logics.size(); i++) {
+
+	}
+
+	return true;
+}
 
 
 

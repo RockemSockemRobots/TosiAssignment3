@@ -35,7 +35,7 @@ class Netlist {
 		std::vector<std::string> getSizes(std::vector<Connector*> vector);
 		std::string connectorsOfSize(std::vector<Connector*> vector, std::string size);
 
-		//int calcTimeASAP(std::vector<Connector*> vector);
+		bool calcTimeASAP();
 
 		//Get
 		std::vector<Connector*> get_inputs() { return this->inputs; }
