@@ -8,17 +8,17 @@ Connector.cpp
 *****************************************/
 #include "Connector.h"
 
-Connector::Connector(std::string type, bool sign, std::string size, std::string name, double delay) {
+Connector::Connector(std::string type, bool sign, std::string size, std::string name, int timeASAP, int timeALAP) {
 	this->type = type;
 	this->size = size;
 	this->name = name;
 	this->sign = sign;
-	this->delay = delay;
+	this->timeASAP = timeASAP;
+	this->timeALAP = timeALAP;
 }
 Connector::Connector() {
 	this->type = "";
 	this->size = "";
 	this->name = "";
 	this->sign = false;
-	this->delay = 0;
 }
