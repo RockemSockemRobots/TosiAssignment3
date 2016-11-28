@@ -18,7 +18,7 @@ Logic::Logic(std::string type, std::string name, std::vector<Connector*> inputs,
 	this->outType = outType;
 	this->timeASAP = timeASAP;
 	this->timeALAP = timeALAP;
-	this->schALAP = false;
 	this->schASAP = false;
+	this->schALAP = false;
 	this->schForce = false;
 }

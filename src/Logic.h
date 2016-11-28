@@ -28,17 +28,23 @@ class Logic {
 		int get_timeASAP() { return this->timeASAP; }
 		int get_timeALAP() { return this->timeALAP; }
 
+		bool get_schASAP() { return this->schASAP; }
 		bool get_schALAP() { return this->schALAP; }
+		bool get_schForce() { return this->schForce; }
+
 		//Set
 		void set_type(std::string type) { this->type = type; }
 		void set_name(std::string name) { this->name = name; }
 		void set_sign(bool sign) { this->sign = sign; }
 		void set_delay(double delay) { this->delay = delay; }
 		void set_outType(std::string outType) { this->outType = outType; }
+
 		void set_timeASAP(int timeASAP) { this->timeASAP = timeASAP; }
 		void set_timeALAP(int timeALAP) { this->timeALAP = timeALAP; }
-
+		void set_schASAP(bool schASAP) { this->schASAP = schASAP; }
 		void set_schALAP(bool schALAP) { this->schALAP = schALAP; }
+		void set_schForce(bool schForce) { this->schForce = schForce; }
+
 	private:
 		std::string type;
 		std::string name;
