@@ -1,7 +1,7 @@
 /****************************************
 Authors: Justin Siekmann, Anthony Ciancio
 NetIDs : jsiekmann, shjay
-Date : 29 November, 2016
+Date : 29 November 2016
 Assignment #3
 
 Netlist.cpp
@@ -30,7 +30,7 @@ Netlist.cpp
 	}
 
 
-
+	- Note: need to produce error if latency constraint is too strict, can't be done
 
 
 
@@ -113,7 +113,10 @@ bool Netlist::readIn(std::string inputFile) {
 	int tempsize;
 	int column;
 	
-	inFile.open(inputFile); //insert empty file logic
+	inFile.open(inputFile);
+	
+	//insert empty file logic
+
 	while (std::getline(inFile,line)) {
 		line.erase(std::remove(line.begin(), line.end(), ','), line.end());
 		std::stringstream line_stream(line);
@@ -138,8 +141,11 @@ bool Netlist::readIn(std::string inputFile) {
 				}
 				type_word = ""; sign_size_word = ""; name_word = ""; pos = 0; sign_word = ""; size_word = "";
 			}
-			//add if statements
-			//add for loops
+
+			// if statements
+
+			// for loops
+			
 			else {
 				//already have word1 as type_word
 				line_stream >> word2;
@@ -326,6 +332,7 @@ void Netlist::writeOut(std::string outputFile) {
 	outFile << ");" << std::endl;
 	outFile << "\tinput Clk, Rst, Start;" << std::endl;
 	outFile << "\toutput Done;" << std::endl;
+
 	//inputs
 	std::vector<std::string> inputSizes = getSizes(this->inputs);
 	for (int i = 0; i != (int)inputSizes.size(); i++) {
@@ -335,6 +342,7 @@ void Netlist::writeOut(std::string outputFile) {
 		}
 		outFile << connectorsOfSize(this->inputs, inputSizes.at(i)) << ";" << std::endl;
 	}
+
 	//outputs
 	std::vector<std::string> outputSizes = getSizes(this->outputs);
 	for (int i = 0; i != (int)outputSizes.size(); i++) {
@@ -345,6 +353,7 @@ void Netlist::writeOut(std::string outputFile) {
 		outFile << connectorsOfSize(this->outputs, outputSizes.at(i)) << ";" << std::endl;
 	}
 	outFile << std::endl;
+
 	//variables (regs)
 	std::vector<std::string> variablesSizes = getSizes(this->variables);
 	for (int i = 0; i != (int)variablesSizes.size(); i++) {
@@ -355,6 +364,7 @@ void Netlist::writeOut(std::string outputFile) {
 		outFile << connectorsOfSize(this->variables, variablesSizes.at(i)) << ";" << std::endl;
 	}
 	outFile << std::endl;
+
 	/*//logics
 	for (int i = 0; i != (int)this->logics.size(); i++) {
 		outFile << compInstanceStr(this->logics.at(i)); //CHANGE
@@ -415,6 +425,7 @@ std::vector<Connector*> Netlist::createCompInputs(std::string input1, std::strin
 	std::vector<Connector*> tempVector;
 	std::vector<Connector*> errorVector;
 	Connector* tempConnector = NULL;
+
 	//input1
 	tempConnector = findName(this->inputs, input1);
 	if (tempConnector == NULL) {
@@ -425,6 +436,7 @@ std::vector<Connector*> Netlist::createCompInputs(std::string input1, std::strin
 		return errorVector;
 	}
 	tempVector.push_back(tempConnector);
+
 	//input2
 	if (input2 != "") {
 		tempConnector = findName(this->inputs, input2);
@@ -437,6 +449,7 @@ std::vector<Connector*> Netlist::createCompInputs(std::string input1, std::strin
 		}
 		tempVector.push_back(tempConnector);
 	}
+
 	//input3
 	if (input3 != "") {
 		tempConnector = findName(this->inputs, input3);
@@ -458,6 +471,7 @@ std::vector<Connector*> Netlist::createCompOutputs(std::string word4, std::strin
 	std::vector<Connector*> tempVector;
 	std::vector<Connector*> errorVector;
 	Connector* tempConnector = NULL;
+
 	//input1
 	tempConnector = findName(this->variables, input1);
 	if (tempConnector == NULL) {
@@ -471,6 +485,7 @@ std::vector<Connector*> Netlist::createCompOutputs(std::string word4, std::strin
 		std::cerr << "Missing variable or output" << std::endl;
 		return errorVector;
 	}
+
 	//input2
 	if (input2 != "") {
 		tempConnector = findName(this->variables, input2);
@@ -486,6 +501,7 @@ std::vector<Connector*> Netlist::createCompOutputs(std::string word4, std::strin
 			return errorVector;
 		}
 	}
+
 	//input3
 	if (input3 != "") {
 		tempConnector = findName(this->variables, input3);
@@ -503,3 +519,73 @@ std::vector<Connector*> Netlist::createCompOutputs(std::string word4, std::strin
 	}
 	return tempVector;
 }
+
+
+
+
+
+// FORCE-DIRECTED SCHEDULING ALGORITHM
+// ***********************************
+// 1. Calculate timeASAP for each node
+//int Netlist::calcTimeASAP(std::vector<Connector*> vector) {
+
+//}
+
+
+
+// 2. Calculate ALAP for each node
+
+
+
+// 3. Populate the resource probability matrix for each resource type
+// note: column 0 is the node number
+
+// add/sub
+// mult
+// div/mod
+// logical
+
+
+
+// 4. Populate the distribution graph for each resource
+// note: column 0 is the node number
+
+// add/sub
+// mult
+// div/mod
+// logical
+
+
+
+
+// 5. Populate the self-forces matrix
+// note: column 0 is the node number
+
+
+
+
+// 6. Populate the total forces matrix
+// note: column 0 is the node number
+
+
+
+
+// 7. Choose the lowest total force node and schedule it
+// set bool scheduled = 1
+
+
+
+
+// Repeat steps 3-7 until all nodes are scheduled
+
+
+
+
+
+
+
+
+
+// STATE MACHINE ALGORITHM
+// ***********************
+// Populate states and transitions based on Force-Directed scheduling

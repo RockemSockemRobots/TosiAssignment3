@@ -1,7 +1,7 @@
 /****************************************
 Authors: Justin Siekmann, Anthony Ciancio
 NetIDs : jsiekmann, shjay
-Date : 25 October, 2016
+Date : 29 November 2016
 Assignment #2
 
 main.cpp

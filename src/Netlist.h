@@ -1,7 +1,7 @@
 /****************************************
 Authors: Justin Siekmann, Anthony Ciancio
 NetIDs : jsiekmann, shjay
-Date : 29 November, 2016
+Date : 29 November 2016
 Assignment #3
 
 Netlist.h
@@ -34,6 +34,8 @@ class Netlist {
 		bool checkSign(std::vector<Connector*> inputs, std::vector<Connector*> outputs);
 		std::vector<std::string> getSizes(std::vector<Connector*> vector);
 		std::string connectorsOfSize(std::vector<Connector*> vector, std::string size);
+
+		//int calcTimeASAP(std::vector<Connector*> vector);
 
 		//Get
 		std::vector<Connector*> get_inputs() { return this->inputs; }
