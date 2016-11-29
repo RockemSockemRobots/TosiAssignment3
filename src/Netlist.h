@@ -42,6 +42,7 @@ class Netlist {
 		void calcDistMatrix();
 		void calcSelfMatrix();
 		void calcTotsMatrix();
+		void schLowest();
 
 		//Get
 		std::vector<Connector*> get_inputs() { return this->inputs; }

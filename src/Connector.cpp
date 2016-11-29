@@ -15,10 +15,12 @@ Connector::Connector(std::string type, bool sign, std::string size, std::string 
 	this->sign = sign;
 	this->timeASAP = timeASAP;
 	this->timeALAP = timeALAP;
+	this->schForce = false;
 }
 Connector::Connector() {
 	this->type = "";
 	this->size = "";
 	this->name = "";
 	this->sign = false;
+	this->schForce = false;
 }

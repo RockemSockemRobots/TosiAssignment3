@@ -32,6 +32,9 @@ class Logic {
 		bool get_schALAP() { return this->schALAP; }
 		bool get_schForce() { return this->schForce; }
 
+		std::vector<double> get_selfForces() { return this->selfForces; }
+		std::vector<double> get_totsForces() { return this->totsForces; }
+
 		//Set
 		void set_type(std::string type) { this->type = type; }
 		void set_name(std::string name) { this->name = name; }
@@ -44,6 +47,9 @@ class Logic {
 		void set_schASAP(bool schASAP) { this->schASAP = schASAP; }
 		void set_schALAP(bool schALAP) { this->schALAP = schALAP; }
 		void set_schForce(bool schForce) { this->schForce = schForce; }
+
+		void set_selfForces(std::vector<double> selfForces) { this->selfForces = selfForces; }
+		void set_totsForces(std::vector<double> totsForces) { this->totsForces = totsForces; }
 
 	private:
 		std::string type;
@@ -58,5 +64,7 @@ class Logic {
 		bool schASAP;
 		bool schALAP;
 		bool schForce;
+		std::vector<double> selfForces;
+		std::vector<double> totsForces;
 };
 #endif
