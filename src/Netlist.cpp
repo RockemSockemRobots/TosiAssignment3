@@ -560,6 +560,28 @@ void Netlist::ForceDir() {
 			this->logics.at(i)->set_schALAP(false);
 			this->logics.at(i)->set_selfForces({});
 			this->logics.at(i)->set_totsForces({});
+			if (this->logics.at(i)->get_schForce() == false) {
+				this->logics.at(i)->set_timeASAP(-1);
+				this->logics.at(i)->set_timeALAP(-1);
+			}
+		}
+		for (int i = 0; i != (int)this->inputs.size(); i++) {
+			this->inputs.at(i)->set_timeASAP(1);
+			if (this->inputs.at(i)->get_schForce() == false) {
+				this->inputs.at(i)->set_timeALAP(-1);
+			}
+		}
+		for (int i = 0; i != (int)this->variables.size(); i++) {
+			if (this->variables.at(i)->get_schForce() == false) {
+				this->variables.at(i)->set_timeASAP((this->latency + 1));
+				this->variables.at(i)->set_timeALAP(-1);
+			}
+		}
+		for (int i = 0; i != (int)this->outputs.size(); i++) {
+			if (this->outputs.at(i)->get_schForce() == false) {
+				this->outputs.at(i)->set_timeASAP((this->latency + 1));
+			}
+			this->outputs.at(i)->set_timeALAP(this->latency);
 		}
 		if (this->calcTimeASAP() == false) {
 			this->error = true;
@@ -609,7 +631,9 @@ bool Netlist::calcTimeASAP() {
 						this->logics.at(i)->set_timeASAP(layer);
 						this->logics.at(i)->set_schASAP(true);
 						for (int k = 0; k != (int)this->logics.at(i)->get_outputs().size(); k++) {
-							this->logics.at(i)->get_outputs().at(k)->set_timeASAP(layer + this->logics.at(i)->get_delay());
+							if (this->logics.at(i)->get_outputs().at(k)->get_schForce() == false) {
+								this->logics.at(i)->get_outputs().at(k)->set_timeASAP(layer + this->logics.at(i)->get_delay());
+							}
 						}
 					}
 				}
@@ -648,7 +672,9 @@ bool Netlist::calcTimeALAP() {
 					this->logics.at(i)->set_timeALAP(layer - this->logics.at(i)->get_delay() + 1);
 					this->logics.at(i)->set_schALAP(true);
 					for (int j = 0; j != (int)this->logics.at(i)->get_inputs().size(); j++) {
-						this->logics.at(i)->get_inputs().at(j)->set_timeALAP(layer - this->logics.at(i)->get_delay());
+						if (this->logics.at(i)->get_inputs().at(j)->get_schForce() == false) {
+							this->logics.at(i)->get_inputs().at(j)->set_timeALAP(layer - this->logics.at(i)->get_delay());
+						}
 					}
 				}
 			}
@@ -908,7 +934,7 @@ void Netlist::calcTotsMatrix() {
 		std::vector<double> tempNodeVect = {};
 		while (layer != latency) {
 			if ((layer + 1) < this->addsubs.at(node)->get_timeASAP() || (layer + 1) > this->addsubs.at(node)->get_timeALAP()) {
-				tempNodeVect.push_back(0);
+				tempNodeVect.push_back(1000);
 			}
 			else {
 				for (int i = 0; i != (int)this->addsubs.at(node)->get_inputs().size(); i++) {
@@ -960,7 +986,7 @@ void Netlist::calcTotsMatrix() {
 		std::vector<double> tempNodeVect = {};
 		while (layer != latency) {
 			if ((layer + 1) < this->mults.at(node)->get_timeASAP() || (layer + 1) > this->mults.at(node)->get_timeALAP()) {
-				tempNodeVect.push_back(0);
+				tempNodeVect.push_back(1000);
 			}
 			else {
 				for (int i = 0; i != (int)this->mults.at(node)->get_inputs().size(); i++) {
@@ -1012,7 +1038,7 @@ void Netlist::calcTotsMatrix() {
 		std::vector<double> tempNodeVect = {};
 		while (layer != latency) {
 			if ((layer + 1) < this->divmods.at(node)->get_timeASAP() || (layer + 1) > this->divmods.at(node)->get_timeALAP()) {
-				tempNodeVect.push_back(0);
+				tempNodeVect.push_back(1000);
 			}
 			else {
 				for (int i = 0; i != (int)this->divmods.at(node)->get_inputs().size(); i++) {
@@ -1064,7 +1090,7 @@ void Netlist::calcTotsMatrix() {
 		std::vector<double> tempNodeVect = {};
 		while (layer != latency) {
 			if ((layer + 1) < this->logs.at(node)->get_timeASAP() || (layer + 1) > this->logs.at(node)->get_timeALAP()) {
-				tempNodeVect.push_back(0);
+				tempNodeVect.push_back(1000);
 			}
 			else {
 				for (int i = 0; i != (int)this->logs.at(node)->get_inputs().size(); i++) {
@@ -1129,6 +1155,16 @@ void Netlist::schLowest() {
 	tempNode->set_timeASAP(tempLayer + 1);
 	tempNode->set_timeALAP(tempLayer + 1);
 	tempNode->set_schForce(true);
+	for (int i = 0; i != (int)tempNode->get_outputs().size(); i++) {
+		tempNode->get_outputs().at(i)->set_timeASAP(tempLayer + 1 + tempNode->get_delay());
+		tempNode->get_outputs().at(i)->set_timeALAP(tempLayer + 1 + tempNode->get_delay());
+		tempNode->get_outputs().at(i)->set_schForce(true);
+	}
+	for (int i = 0; i != (int)tempNode->get_inputs().size(); i++) {
+		tempNode->get_inputs().at(i)->set_timeASAP(tempLayer + 1 - tempNode->get_delay());
+		tempNode->get_inputs().at(i)->set_timeALAP(tempLayer + 1 - tempNode->get_delay());
+		tempNode->get_inputs().at(i)->set_schForce(true);
+	}
 }
 
 
