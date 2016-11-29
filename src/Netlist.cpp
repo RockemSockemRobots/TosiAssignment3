@@ -90,6 +90,10 @@ Netlist.cpp
 #include "Netlist.h"
 
 Netlist::Netlist(std::string inputFile, std::string latency) {
+	this->numAddSub = 0;
+	this->numMult = 0;
+	this->numDivMod = 0;
+	this->numLog = 0;
 	this->latency = stoi(latency);
 	this->error = Netlist::readIn(inputFile);
 }
@@ -182,6 +186,7 @@ bool Netlist::readIn(std::string inputFile) {
 							}
 							this->logics.push_back(new Logic("ADD", "add" + std::to_string(ADDs), tempInputs, tempOutputs, false, 1, "", -1, -1));
 							ADDs++;
+							this->numAddSub++;
 						}
 						else {
 							tempInputs = createCompInputs(word3);
@@ -191,6 +196,7 @@ bool Netlist::readIn(std::string inputFile) {
 							}
 							this->logics.push_back(new Logic("INC", "inc" + std::to_string(INCs), tempInputs, tempOutputs, false, 1, "", -1, -1));
 							INCs++;
+							this->numAddSub++;
 						}
 						break;
 					case 1:
@@ -202,6 +208,7 @@ bool Netlist::readIn(std::string inputFile) {
 							}
 							this->logics.push_back(new Logic("SUB", "sub" + std::to_string(SUBs), tempInputs, tempOutputs, false, 1, "", -1, -1));
 							SUBs++;
+							this->numAddSub++;
 						}
 						else {
 							tempInputs = createCompInputs(word3);
@@ -211,6 +218,7 @@ bool Netlist::readIn(std::string inputFile) {
 							}
 							this->logics.push_back(new Logic("DEC", "dec" + std::to_string(DECs), tempInputs, tempOutputs, false, 1, "", -1, -1));
 							DECs++;
+							this->numAddSub++;
 						}
 						break;
 					case 2:
@@ -221,6 +229,7 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						this->logics.push_back(new Logic("MUL", "mul" + std::to_string(MULs), tempInputs, tempOutputs, false, 2, "", -1, -1));
 						MULs++;
+						this->numMult++;
 						break;
 					case 3:
 						tempInputs = createCompInputs(word3, word5);
@@ -230,6 +239,7 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "gt", -1, -1));
 						COMPs++;
+						this->numLog++;
 						break;
 					case 4:
 						tempInputs = createCompInputs(word3, word5);
@@ -239,6 +249,7 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "lt", -1, -1));
 						COMPs++;
+						this->numLog++;
 						break;
 					case 5:
 						tempInputs = createCompInputs(word3, word5);
@@ -248,6 +259,7 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "eq", -1, -1));
 						COMPs++;
+						this->numLog++;
 						break;
 					case 6:
 						tempInputs = createCompInputs(word3, word5);
@@ -257,6 +269,7 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						this->logics.push_back(new Logic("SHR", "shr" + std::to_string(SHRs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "", -1, -1));
 						SHRs++;
+						this->numLog++;
 						break;
 					case 7:
 						tempInputs = createCompInputs(word3, word5);
@@ -266,6 +279,7 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						this->logics.push_back(new Logic("SHL", "shl" + std::to_string(SHLs), tempInputs, tempOutputs, false, 1, "", -1, -1));
 						SHLs++;
+						this->numLog++;
 						break;
 					case 8:
 						tempInputs = createCompInputs(word3, word5);
@@ -275,6 +289,7 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						this->logics.push_back(new Logic("DIV", "div" + std::to_string(DIVs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1));
 						DIVs++;
+						this->numDivMod++;
 						break;
 					case 9:
 						tempInputs = createCompInputs(word3, word5);
@@ -284,6 +299,7 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						this->logics.push_back(new Logic("MOD", "mod" + std::to_string(MODs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1));
 						MODs++;
+						this->numDivMod++;
 						break;
 					case 10:
 						if (word6 == ":") {
@@ -294,6 +310,7 @@ bool Netlist::readIn(std::string inputFile) {
 							}
 							this->logics.push_back(new Logic("MUX2x1", "mux" + std::to_string(MUX2x1s), tempInputs, tempOutputs, false, 1, "", -1, -1));
 							MUX2x1s++;
+							this->numLog++;
 						}
 						else {
 							std::cerr << "Incorrect Operator: " << word6 << std::endl;
@@ -526,39 +543,71 @@ std::vector<Connector*> Netlist::createCompOutputs(std::string word4, std::strin
 
 // FORCE-DIRECTED SCHEDULING ALGORITHM
 // ***********************************
+void Netlist::ForceDir() {
+	if (this->calcTimeASAP() == false) {
+		this->error = true;
+		return;
+	}
+	if (this->calcTimeALAP() == false) {
+		this->error = true;
+		return;
+	}
+	for (int i = 0; i != (int)this->logics.size(); i++) {
+		if (this->logics.at(i)->get_type() == "ADD" || this->logics.at(i)->get_type() == "INC" || this->logics.at(i)->get_type() == "SUB" || this->logics.at(i)->get_type() == "DEC") {
+			this->addsubs.push_back(this->logics.at(i));
+		}
+		else if (this->logics.at(i)->get_type() == "MUL") {
+			this->mults.push_back(this->logics.at(i));
+		}
+		else if (this->logics.at(i)->get_type() == "DIV" || this->logics.at(i)->get_type() == "MOD") {
+			this->divmods.push_back(this->logics.at(i));
+		}
+		else if (this->logics.at(i)->get_type() == "COMP" || this->logics.at(i)->get_type() == "SHR" || this->logics.at(i)->get_type() == "SHL" || this->logics.at(i)->get_type() == "MUX2x1") {
+			this->logs.push_back(this->logics.at(i));
+		}
+	}
+
+	this->calcProbMatrix();
+	this->calcDistMatrix();
+	this->calcSelfMatrix();
+}
+
 // 1. Calculate timeASAP for each node
 bool Netlist::calcTimeASAP() {
-
 	int layer = 1;
-
 	// loop until every layer up to latency is scheduled
-	while (layer < this->latency) {
-
+	while (layer <= this->latency) {
 		// check every logic node
 		for (int i = 0; i != (int)this->logics.size(); i++) {
-
+			bool goodgoodInputs = true;
 			// check if the node is already scheduled
-			if (this->logics.at(i)->get_schASAP = false) {
-
+			if (this->logics.at(i)->get_schASAP() == false) {
 				// if not scheduled yet, check if all inputs to that logic are <= layer
 				for (int j = 0; j != this->logics.at(i)->get_inputs().size(); j++) {
-					if (this->logics.at(i)->get_inputs().at(j)->get_timeASAP() <= layer) {
-						
-						// schedule the node, set the schASAP flag
-
+					if (this->logics.at(i)->get_inputs().at(j)->get_timeASAP() > layer) {
+						goodgoodInputs = false;
+					}
+				}
+				if (goodgoodInputs == true) {
+					//schedule the node, set the schASAP flag
+					this->logics.at(i)->set_timeASAP(layer);
+					this->logics.at(i)->set_schASAP(true);
+					for (int k = 0; k != (int)this->logics.at(i)->get_outputs().size(); k++) {
+						this->logics.at(i)->get_outputs().at(k)->set_timeASAP(layer + this->logics.at(i)->get_delay());
 					}
 				}
 			}
 		}
 		layer++;
 	}
-
 	// when done, check that every node has been scheduled
 	// else, return error
 	for (int i = 0; i != (int)this->logics.size(); i++) {
-
+		if (this->logics.at(i)->get_schASAP() == false) {
+			std::cerr << "Input Latency Insufficient";
+			return false;
+		}
 	}
-
 	return true;
 }
 
@@ -567,8 +616,18 @@ bool Netlist::calcTimeALAP() {
 	int layer = this->latency;
 	while (layer > 0) {
 		for (int i = 0; i != (int)this->logics.size(); i++) {
-			if (this->logics.at(i)->get_outputs().at(0)->get_timeALAP() == layer) {
-				this->logics.at(i)->set_timeALAP(layer);
+			bool goodgoodOutputs = true;
+			bool goodgoodLayer = false;
+			for (int k = 0; k != (int)this->logics.at(i)->get_outputs().size(); k++) {
+				if (this->logics.at(i)->get_outputs().at(k)->get_timeALAP() < layer) {
+					goodgoodOutputs = false;
+				}
+				if (this->logics.at(i)->get_outputs().at(k)->get_timeALAP() == layer) {
+					goodgoodLayer = true;
+				}
+			}
+			if (goodgoodOutputs == true && goodgoodLayer == true) {
+				this->logics.at(i)->set_timeALAP(layer - this->logics.at(i)->get_delay() + 1);
 				this->logics.at(i)->set_schALAP(true);
 				for (int j = 0; j != (int)this->logics.at(i)->get_inputs().size(); j++) {
 					this->logics.at(i)->get_inputs().at(j)->set_timeALAP(layer - this->logics.at(i)->get_delay());
@@ -587,35 +646,226 @@ bool Netlist::calcTimeALAP() {
 }
 
 // 3. Populate the resource probability matrix for each resource type
-// note: column 0 is the node number
 
-// add/sub
-// mult
-// div/mod
-// logical
+void Netlist::calcProbMatrix() {	
+	// add/sub
+	int node = 0;
+	int layer = 0;
+	while (node != (int)this->addsubs.size()){
+		layer = 0;
+		std::vector<double> tempNodeVect = {};
+		while (layer != latency) {
+			if ((layer+1) < this->addsubs.at(node)->get_timeASAP() || (layer+1) > this->addsubs.at(node)->get_timeALAP()) {
+				tempNodeVect.push_back(0);
+			}
+			else {
+				tempNodeVect.push_back(1 / ((double)this->addsubs.at(node)->get_timeALAP() - (double)this->addsubs.at(node)->get_timeASAP() + 1));
+			}
+			layer++;
+		}
+		this->probAddSub.push_back(tempNodeVect);
+		node++;
+	}
+	// mult
+	node = 0;
+	while (node != (int)this->mults.size()) {
+		layer = 0;
+		std::vector<double> tempNodeVect = {};
+		while (layer != latency) {
+			if ((layer + 1) < this->mults.at(node)->get_timeASAP() || (layer + 1) > this->mults.at(node)->get_timeALAP()) {
+				tempNodeVect.push_back(0);
+			}
+			else {
+				tempNodeVect.push_back(1 / ((double)this->mults.at(node)->get_timeALAP() - (double)this->mults.at(node)->get_timeASAP() + 1));
+			}
+			layer++;
+		}
+		this->probMult.push_back(tempNodeVect);
+		node++;
+	}
+	// div/mod
+	node = 0;
+	while (node != (int)this->divmods.size()) {
+		layer = 0;
+		std::vector<double> tempNodeVect = {};
+		while (layer != latency) {
+			if ((layer + 1) < this->divmods.at(node)->get_timeASAP() || (layer + 1) > this->divmods.at(node)->get_timeALAP()) {
+				tempNodeVect.push_back(0);
+			}
+			else {
+				tempNodeVect.push_back(1 / ((double)this->divmods.at(node)->get_timeALAP() - (double)this->divmods.at(node)->get_timeASAP() + 1));
+			}
+			layer++;
+		}
+		this->probDivMod.push_back(tempNodeVect);
+		node++;
+	}
+	// logical
+	node = 0;
+	while (node != (int)this->logs.size()) {
+		layer = 0;
+		std::vector<double> tempNodeVect = {};
+		while (layer != latency) {
+			if ((layer + 1) < this->logs.at(node)->get_timeASAP() || (layer + 1) > this->logs.at(node)->get_timeALAP()) {
+				tempNodeVect.push_back(0);
+			}
+			else {
+				tempNodeVect.push_back(1 / ((double)this->logs.at(node)->get_timeALAP() - (double)this->logs.at(node)->get_timeASAP() + 1));
+			}
+			layer++;
+		}
+		this->probLog.push_back(tempNodeVect);
+		node++;
+	}
+}
 
-
-
-// 4. Populate the distribution graph for each resource
-// note: column 0 is the node number
-
-// add/sub
-// mult
-// div/mod
-// logical
-
-
+// 4. Populate the distribution for each resource
+void Netlist::calcDistMatrix() {
+	// add/sub
+	for (int i = 0; i != latency; i++) {
+		double tempProb = 0;
+		for (int j = 0; j != (int)this->addsubs.size(); j++) {
+			tempProb = tempProb + this->probAddSub.at(j).at(i);
+		}
+		this->distAddSub.push_back(tempProb);
+	}
+	// mult
+	for (int i = 0; i != latency; i++) {
+		double tempProb = 0;
+		for (int j = 0; j != (int)this->mults.size(); j++) {
+			tempProb = tempProb + this->probMult.at(j).at(i);
+		}
+		this->distMult.push_back(tempProb);
+	}
+	// div/mod
+	for (int i = 0; i != latency; i++) {
+		double tempProb = 0;
+		for (int j = 0; j != (int)this->divmods.size(); j++) {
+			tempProb = tempProb + this->probDivMod.at(j).at(i);
+		}
+		this->distDivMod.push_back(tempProb);
+	}
+	// logical
+	for (int i = 0; i != latency; i++) {
+		double tempProb = 0;
+		for (int j = 0; j != (int)this->logs.size(); j++) {
+			tempProb = tempProb + this->probLog.at(j).at(i);
+		}
+		this->distLog.push_back(tempProb);
+	}
+}
 
 
 // 5. Populate the self-forces matrix
-// note: column 0 is the node number
-
-
-
+void Netlist::calcSelfMatrix() {
+	//addsubs
+	int node = 0;
+	int layer = 0;
+	while (node != (int)this->addsubs.size()) {
+		layer = 0;
+		std::vector<double> tempNodeVect = {};
+		while (layer != latency) {
+			if ((layer + 1) < this->addsubs.at(node)->get_timeASAP() || (layer + 1) > this->addsubs.at(node)->get_timeALAP()) {
+				tempNodeVect.push_back(0);
+			}
+			else {
+				double temp = 0;
+					for (int j = 0; j != (int)this->distAddSub.size(); j++) {
+						if (j == layer) {
+							temp = temp + this->distAddSub.at(j)*(1 - this->probAddSub.at(node).at(j));
+						}
+						else {
+							temp = temp + this->distAddSub.at(j)*(0 - this->probAddSub.at(node).at(j));
+						}
+					}
+				tempNodeVect.push_back(temp);
+			}
+			layer++;
+		}
+		this->selfAddSub.push_back(tempNodeVect);
+		node++;
+	}
+	//mults
+	while (node != (int)this->mults.size()) {
+		layer = 0;
+		std::vector<double> tempNodeVect = {};
+		while (layer != latency) {
+			if ((layer + 1) < this->mults.at(node)->get_timeASAP() || (layer + 1) > this->mults.at(node)->get_timeALAP()) {
+				tempNodeVect.push_back(0);
+			}
+			else {
+				double temp = 0;
+				for (int j = 0; j != (int)this->distMult.size(); j++) {
+					if (j == layer) {
+						temp = temp + this->distMult.at(j)*(1 - this->probMult.at(node).at(j));
+					}
+					else {
+						temp = temp + this->distMult.at(j)*(0 - this->probMult.at(node).at(j));
+					}
+				}
+				tempNodeVect.push_back(temp);
+			}
+			layer++;
+		}
+		this->selfMult.push_back(tempNodeVect);
+		node++;
+	}
+	//divmods
+	while (node != (int)this->divmods.size()) {
+		layer = 0;
+		std::vector<double> tempNodeVect = {};
+		while (layer != latency) {
+			if ((layer + 1) < this->divmods.at(node)->get_timeASAP() || (layer + 1) > this->divmods.at(node)->get_timeALAP()) {
+				tempNodeVect.push_back(0);
+			}
+			else {
+				double temp = 0;
+				for (int j = 0; j != (int)this->distDivMod.size(); j++) {
+					if (j == layer) {
+						temp = temp + this->distDivMod.at(j)*(1 - this->probDivMod.at(node).at(j));
+					}
+					else {
+						temp = temp + this->distDivMod.at(j)*(0 - this->probDivMod.at(node).at(j));
+					}
+				}
+				tempNodeVect.push_back(temp);
+			}
+			layer++;
+		}
+		this->selfDivMod.push_back(tempNodeVect);
+		node++;
+	}
+	//logs
+	while (node != (int)this->logs.size()) {
+		layer = 0;
+		std::vector<double> tempNodeVect = {};
+		while (layer != latency) {
+			if ((layer + 1) < this->logs.at(node)->get_timeASAP() || (layer + 1) > this->logs.at(node)->get_timeALAP()) {
+				tempNodeVect.push_back(0);
+			}
+			else {
+				double temp = 0;
+				for (int j = 0; j != (int)this->distLog.size(); j++) {
+					if (j == layer) {
+						temp = temp + this->distLog.at(j)*(1 - this->probLog.at(node).at(j));
+					}
+					else {
+						temp = temp + this->distLog.at(j)*(0 - this->probLog.at(node).at(j));
+					}
+				}
+				tempNodeVect.push_back(temp);
+			}
+			layer++;
+		}
+		this->selfLog.push_back(tempNodeVect);
+		node++;
+	}
+}
 
 // 6. Populate the total forces matrix
-// note: column 0 is the node number
-
+void Netlist::calcTotsMatrix() {
+	
+}
 
 
 
