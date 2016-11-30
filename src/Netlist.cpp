@@ -6,35 +6,7 @@ Assignment #3
 
 Netlist.cpp
 *****************************************/
-
-/*	ALAP calculation:
-	*****************
-	// note that outputs already have timeALAP
-	latency = latencyInput;
-
-	while (latency > 0) {
-
-		for (i=0; i != logic.size(); i++) {
-			
-			if (logic.at(i)->get_Output()->get_timeALAP() == latency) {
-				logic.at(i)->set_timeALAP() = latency;
-
-				for (j=0; j != logic.at(i)->inputs.size(); j++) {
-					logic.at(i)->get_Inputs.at(j)->set_timeALAP(latency);
-				}
-			}
-			else {
-			}
-		}
-	latency--;
-	}
-
-
-	- Note: need to produce error if latency constraint is too strict, can't be done
-
-
-
-
+/*
 	Force calculation:
 	******************
 
@@ -173,7 +145,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("ADD", "add" + std::to_string(ADDs), tempInputs, tempOutputs, false, 1, "", -1, -1));
+							this->logics.push_back(new Logic("ADD", "add" + std::to_string(ADDs), tempInputs, tempOutputs, false, 1, "", -1, -1, "+"));
 							ADDs++;
 							this->numAddSub++;
 						}
@@ -183,7 +155,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("INC", "inc" + std::to_string(INCs), tempInputs, tempOutputs, false, 1, "", -1, -1));
+							this->logics.push_back(new Logic("INC", "inc" + std::to_string(INCs), tempInputs, tempOutputs, false, 1, "", -1, -1, "+"));
 							INCs++;
 							this->numAddSub++;
 						}
@@ -195,7 +167,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("SUB", "sub" + std::to_string(SUBs), tempInputs, tempOutputs, false, 1, "", -1, -1));
+							this->logics.push_back(new Logic("SUB", "sub" + std::to_string(SUBs), tempInputs, tempOutputs, false, 1, "", -1, -1, "-"));
 							SUBs++;
 							this->numAddSub++;
 						}
@@ -205,7 +177,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("DEC", "dec" + std::to_string(DECs), tempInputs, tempOutputs, false, 1, "", -1, -1));
+							this->logics.push_back(new Logic("DEC", "dec" + std::to_string(DECs), tempInputs, tempOutputs, false, 1, "", -1, -1, "-"));
 							DECs++;
 							this->numAddSub++;
 						}
@@ -216,7 +188,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("MUL", "mul" + std::to_string(MULs), tempInputs, tempOutputs, false, 2, "", -1, -1));
+						this->logics.push_back(new Logic("MUL", "mul" + std::to_string(MULs), tempInputs, tempOutputs, false, 2, "", -1, -1, "*"));
 						MULs++;
 						this->numMult++;
 						break;
@@ -226,7 +198,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "gt", -1, -1));
+						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "gt", -1, -1, ">"));
 						COMPs++;
 						this->numLog++;
 						break;
@@ -236,7 +208,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "lt", -1, -1));
+						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "lt", -1, -1, "<"));
 						COMPs++;
 						this->numLog++;
 						break;
@@ -246,7 +218,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "eq", -1, -1));
+						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "eq", -1, -1, "=="));
 						COMPs++;
 						this->numLog++;
 						break;
@@ -256,7 +228,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("SHR", "shr" + std::to_string(SHRs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "", -1, -1));
+						this->logics.push_back(new Logic("SHR", "shr" + std::to_string(SHRs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "", -1, -1, ">>"));
 						SHRs++;
 						this->numLog++;
 						break;
@@ -266,7 +238,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("SHL", "shl" + std::to_string(SHLs), tempInputs, tempOutputs, false, 1, "", -1, -1));
+						this->logics.push_back(new Logic("SHL", "shl" + std::to_string(SHLs), tempInputs, tempOutputs, false, 1, "", -1, -1, "<<"));
 						SHLs++;
 						this->numLog++;
 						break;
@@ -276,7 +248,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("DIV", "div" + std::to_string(DIVs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1));
+						this->logics.push_back(new Logic("DIV", "div" + std::to_string(DIVs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1, "/"));
 						DIVs++;
 						this->numDivMod++;
 						break;
@@ -286,7 +258,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("MOD", "mod" + std::to_string(MODs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1));
+						this->logics.push_back(new Logic("MOD", "mod" + std::to_string(MODs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1, "%"));
 						MODs++;
 						this->numDivMod++;
 						break;
@@ -297,7 +269,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("MUX2x1", "mux" + std::to_string(MUX2x1s), tempInputs, tempOutputs, false, 1, "", -1, -1));
+							this->logics.push_back(new Logic("MUX2x1", "mux" + std::to_string(MUX2x1s), tempInputs, tempOutputs, false, 1, "", -1, -1, "?"));
 							MUX2x1s++;
 							this->numLog++;
 						}
@@ -336,13 +308,13 @@ void Netlist::writeOut(std::string outputFile) {
 		}
 	}
 	outFile << ");" << std::endl;
-	outFile << "\tinput Clk, Rst, Start;" << std::endl;
-	outFile << "\toutput Done;" << std::endl;
+	outFile << "\t" << "input Clk, Rst, Start;" << std::endl;
+	outFile << "\t" << "output reg Done;" << std::endl << std::endl;
 
 	//inputs
 	std::vector<std::string> inputSizes = getSizes(this->inputs);
 	for (int i = 0; i != (int)inputSizes.size(); i++) {
-		outFile << "\tinput ";
+		outFile << "\t" << "input ";
 		if (inputSizes.at(i) != "1") {
 			outFile << "[" << (stoi(inputSizes.at(i)) - 1) << ":0] ";
 		}
@@ -352,18 +324,17 @@ void Netlist::writeOut(std::string outputFile) {
 	//outputs
 	std::vector<std::string> outputSizes = getSizes(this->outputs);
 	for (int i = 0; i != (int)outputSizes.size(); i++) {
-		outFile << "\toutput reg ";
+		outFile << "\t" << "output reg ";
 		if (outputSizes.at(i) != "1") {
 			outFile << "[" << (stoi(outputSizes.at(i)) - 1) << ":0] ";
 		}
 		outFile << connectorsOfSize(this->outputs, outputSizes.at(i)) << ";" << std::endl;
 	}
-	outFile << std::endl;
 
 	//variables (regs)
 	std::vector<std::string> variablesSizes = getSizes(this->variables);
 	for (int i = 0; i != (int)variablesSizes.size(); i++) {
-		outFile << "\treg ";
+		outFile << "\t" << "reg ";
 		if (variablesSizes.at(i) != "1") {
 			outFile << "[" << (stoi(variablesSizes.at(i)) - 1) << ":0] ";
 		}
@@ -371,13 +342,85 @@ void Netlist::writeOut(std::string outputFile) {
 	}
 	outFile << std::endl;
 
-	/*//logics
-	for (int i = 0; i != (int)this->logics.size(); i++) {
-		outFile << compInstanceStr(this->logics.at(i)); //CHANGE
-	}*/
+	int stateRegBits = std::ceil(std::log2(this->states.size() + 2)) - 1;
+	outFile << "\t" << "reg [" << stateRegBits << ":0] State;" << std::endl;
+	outFile << "\t" << "parameter Wait = 0;" << std::endl;
+	outFile << "\t" << "parameter Final = " << (this->states.size() + 1) << ";" << std::endl;
+	outFile << std::endl;
 
-	//STATES
+	outFile << "\t" << "initial begin" << std::endl;
+	outFile << "\t\t" << "State <= Wait;" << std::endl;
+	for (int i = 0; i < (int)this->variables.size(); i++) {
+		outFile << "\t\t" << this->variables.at(i)->get_name() << " <= 0;" << std::endl;
+	}
+	for (int i = 0; i < (int)this->outputs.size(); i++) {
+		outFile << "\t\t" << this->outputs.at(i)->get_name() << " <= 0;" << std::endl;
+	}
+	outFile << "\t" << "end" << std::endl;
+	outFile << std::endl;
 
+	outFile << "\t" << "always @ (posedge Clk) begin" << std::endl;
+	outFile << "\t\t" << "if (Rst) begin" << std::endl;
+	outFile << "\t\t\t" << "State <= Wait;" << std::endl;
+	for (int i = 0; i < (int)this->variables.size(); i++) {
+		outFile << "\t\t\t" << this->variables.at(i)->get_name() << " <= 0;" << std::endl;
+	}
+	for (int i = 0; i < (int)this->outputs.size(); i++) {
+		outFile << "\t\t\t" << this->outputs.at(i)->get_name() << " <= 0;" << std::endl;
+	}
+	outFile << "\t\t" << "end" << std::endl;
+	outFile << std::endl;
+
+	outFile << "\t\t" << "else begin" << std::endl;
+	outFile << "\t\t\t" << "case (State)" << std::endl;
+	outFile << "\t\t\t\t" << "Wait: begin" << std::endl;
+	outFile << "\t\t\t\t\t" << "Done <= 0;" << std::endl;
+	outFile << "\t\t\t\t\t" << "if (Start) begin" << std::endl;
+	outFile << "\t\t\t\t\t\t" << "State <= 1;" << std::endl;
+	outFile << "\t\t\t\t\t" << "end" << std::endl;
+	outFile << "\t\t\t\t\t" << "else begin" << std::endl;
+	outFile << "\t\t\t\t\t\t" << "State <= Wait;" << std::endl;
+	outFile << "\t\t\t\t\t" << "end" << std::endl;
+	outFile << "\t\t\t\t" << "end" << std::endl;
+
+	for (int i = 0; i < (int)this->states.size(); i++) {
+		outFile << "\t\t\t\t" << this->states.at(i)->get_name() << ": begin" << std::endl;
+		for (int j = 0; j < (int)this->states.at(i)->get_operations().size(); j++) {
+			outFile << "\t\t\t\t\t" << this->states.at(i)->get_operations().at(j)->get_outputs().at(0)->get_name();
+			outFile << " <= ";
+			if (this->states.at(i)->get_operations().at(j)->get_type() == "MUX2x1") {
+				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(2)->get_name();
+				outFile << " ? ";
+				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(0)->get_name();
+				outFile << " : ";
+				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(1)->get_name();
+				outFile << ";" << std::endl;
+			}
+			else {
+				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(0)->get_name();
+				outFile << " " << this->states.at(i)->get_operations().at(j)->get_typeSymbol() << " ";
+				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(1)->get_name();
+				outFile << ";" << std::endl;
+			}
+		}
+		if (this->states.at(i)->get_name() == (int)this->states.size()) {
+			outFile << "\t\t\t\t\t" << "State <= Final;" << std::endl;
+			outFile << "\t\t\t\t" << "end" << std::endl;
+		}
+		else {
+			outFile << "\t\t\t\t\t" << "State <= " << this->states.at(i)->get_name() + 1 << ";" << std::endl;
+			outFile << "\t\t\t\t" << "end" << std::endl;
+		}
+	}
+
+	outFile << "\t\t\t\t" << "Final: begin" << std::endl;
+	outFile << "\t\t\t\t\t" << "Done <= 1;" << std::endl;
+	outFile << "\t\t\t\t\t" << "State <= Wait;" << std::endl;
+	outFile << "\t\t\t\t" << "end" << std::endl;
+	
+	outFile << "\t\t\t" << "endcase" << std::endl;
+	outFile << "\t\t" << "end" << std::endl;
+	outFile << "\t" << "end" << std::endl;
 	outFile << "endmodule";
 
 	outFile.close();
@@ -1168,17 +1211,34 @@ void Netlist::schLowest() {
 }
 
 
-
-// Repeat steps 1-7 until all nodes are scheduled
-
-
-
-
-
-
-
-
-
 // STATE MACHINE ALGORITHM
 // ***********************
 // Populate states and transitions based on Force-Directed scheduling
+
+void Netlist::populate() {
+	int numTrans = this->latency + 1;
+	int numStates = this->latency;
+	for (int i = 1; i <= numTrans; i++) {
+		this->transitions.push_back(new Transition(i - 1, i, ""));
+	}
+	std::vector<Logic*> tempOps;
+	std::vector<Transition*> tempIns;
+	std::vector<Transition*> tempOuts;
+	for (int layer = 1; layer <= numStates; layer++) {
+		tempOps.clear(); tempIns.clear(); tempOuts.clear();
+		for (int i = 0; i < (int)this->logics.size(); i++) {
+			if (this->logics.at(i)->get_timeASAP() == layer) {
+				tempOps.push_back(this->logics.at(i));
+			}
+		}
+		for (int i = 0; i < (int)this->transitions.size(); i++) {
+			if (this->transitions.at(i)->get_dst() == layer) {
+				tempIns.push_back(this->transitions.at(i));
+			}
+			if (this->transitions.at(i)->get_src() == layer) {
+				tempOuts.push_back(this->transitions.at(i));
+			}
+		}
+		this->states.push_back(new State(layer, tempIns, tempOuts, tempOps));
+	}
+}

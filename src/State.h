@@ -18,14 +18,16 @@ State.h
 class State{
 	public:
 		// Constructor
-		//State(std::string name, std::vector<Transition*> inputTransitions, std::vector<Transition*> outputTransitions, std::vector<Logic*> operations);
+		State(int name, std::vector<Transition*> inputTransitions, std::vector<Transition*> outputTransitions, std::vector<Logic*> operations);
 
 		//insert getters and setters
+		int get_name() { return this->name; }
+		std::vector<Logic*> get_operations() { return this->operations; }
 
 	private:
-		std::string name;
-		//std::vector<Transition*> inputTransitions;
-		//std::vector<Transition*> outputTransitions;
+		int name;
+		std::vector<Transition*> inputTransitions;
+		std::vector<Transition*> outputTransitions;
 		std::vector<Logic*> operations;
 };  
 

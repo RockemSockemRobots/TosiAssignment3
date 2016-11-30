@@ -16,7 +16,7 @@ Logic.h
 
 class Logic {
 	public:
-		Logic(std::string type, std::string name, std::vector<Connector*> inputs, std::vector<Connector*> outputs, bool sign, int delay, std::string outType, int timeASAP, int timeALAP);
+		Logic(std::string type, std::string name, std::vector<Connector*> inputs, std::vector<Connector*> outputs, bool sign, int delay, std::string outType, int timeASAP, int timeALAP, std::string typeSymbol);
 		//Get
 		std::string get_type() { return this->type; }
 		std::string get_name() { return this->name; }
@@ -31,6 +31,8 @@ class Logic {
 		bool get_schASAP() { return this->schASAP; }
 		bool get_schALAP() { return this->schALAP; }
 		bool get_schForce() { return this->schForce; }
+
+		std::string get_typeSymbol() { return this->typeSymbol; }
 
 		std::vector<double> get_selfForces() { return this->selfForces; }
 		std::vector<double> get_totsForces() { return this->totsForces; }
@@ -66,5 +68,6 @@ class Logic {
 		bool schForce;
 		std::vector<double> selfForces;
 		std::vector<double> totsForces;
+		std::string typeSymbol;
 };
 #endif

@@ -44,6 +44,8 @@ class Netlist {
 		void calcTotsMatrix();
 		void schLowest();
 
+		void populate();
+
 		//Get
 		std::vector<Connector*> get_inputs() { return this->inputs; }
 		std::vector<Connector*> get_outputs() { return this->outputs; }

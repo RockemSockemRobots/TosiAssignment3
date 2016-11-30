@@ -8,7 +8,7 @@ Logic.cpp
 *****************************************/
 #include "Logic.h"
 
-Logic::Logic(std::string type, std::string name, std::vector<Connector*> inputs, std::vector<Connector*> outputs, bool sign, int delay, std::string outType, int timeASAP, int timeALAP) {
+Logic::Logic(std::string type, std::string name, std::vector<Connector*> inputs, std::vector<Connector*> outputs, bool sign, int delay, std::string outType, int timeASAP, int timeALAP, std::string typeSymbol) {
 	this->type = type;
 	this->name = name;
 	this->inputs = inputs;
@@ -21,4 +21,5 @@ Logic::Logic(std::string type, std::string name, std::vector<Connector*> inputs,
 	this->schASAP = false;
 	this->schALAP = false;
 	this->schForce = false;
+	this->typeSymbol = typeSymbol;
 }

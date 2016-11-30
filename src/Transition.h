@@ -12,19 +12,22 @@ State.h
 #include <vector>
 #include <string>
 
-#include "State.h"
+class State;
 
 class Transition{
 	public:
 		// Constructor
-		//Transition(std::string name, State* src, State* dst);
+		Transition(int src, int dst, std::string condition);
 
 		//insert getters and setters
+		int get_src() { return this->src; }
+		int get_dst() { return this->dst; }
+		std::string get_condition() { return this->condition; }
 
 	private:
-		std::string name;
-		//State* src;
-		//State* dst;
+		int src;
+		int dst;
+		std::string condition;
 };
 
 #endif

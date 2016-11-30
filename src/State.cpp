@@ -8,9 +8,9 @@ State.cpp
 *****************************************/
 #include "State.h"
 
-/*State::State(std::string name, std::vector<Transition*> inputTransitions, std::vector<Transition*> outputTransitions, std::vector<Logic*> operations) {
+State::State(int name, std::vector<Transition*> inputTransitions, std::vector<Transition*> outputTransitions, std::vector<Logic*> operations) {
 	this->name = name;
 	this->inputTransitions = inputTransitions;
 	this->outputTransitions = outputTransitions;
 	this->operations = operations;
-}*/
+}

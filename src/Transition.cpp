@@ -8,8 +8,8 @@ Transition.cpp
 *****************************************/
 #include "Transition.h"
 
-/*Transition::Transition(std::string name, State* src, State* dst) {
-	this->name = name;
+Transition::Transition(int src, int dst, std::string condition) {
 	this->src = src;
 	this->dst = dst;
-}*/
+	this->condition = condition;
+}
