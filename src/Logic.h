@@ -27,6 +27,8 @@ class Logic {
 		std::vector<Connector*> get_outputs() { return this->outputs; }
 		int get_timeASAP() { return this->timeASAP; }
 		int get_timeALAP() { return this->timeALAP; }
+		int get_minASAP() { return this->minASAP; }
+		int get_maxALAP() { return this->maxALAP; }
 
 		bool get_schASAP() { return this->schASAP; }
 		bool get_schALAP() { return this->schALAP; }
@@ -44,8 +46,12 @@ class Logic {
 		void set_delay(int delay) { this->delay = delay; }
 		void set_outType(std::string outType) { this->outType = outType; }
 
+		void set_outputs(std::vector<Connector*> outputs) { this->outputs = outputs; }
+
 		void set_timeASAP(int timeASAP) { this->timeASAP = timeASAP; }
 		void set_timeALAP(int timeALAP) { this->timeALAP = timeALAP; }
+		void set_minASAP(int minASAP) { this->minASAP = minASAP; }
+		void set_maxALAP(int maxALAP) { this->maxALAP = maxALAP; }
 		void set_schASAP(bool schASAP) { this->schASAP = schASAP; }
 		void set_schALAP(bool schALAP) { this->schALAP = schALAP; }
 		void set_schForce(bool schForce) { this->schForce = schForce; }
@@ -63,6 +69,8 @@ class Logic {
 		std::string outType;
 		int timeASAP;
 		int timeALAP;
+		int minASAP;
+		int maxALAP;
 		bool schASAP;
 		bool schALAP;
 		bool schForce;

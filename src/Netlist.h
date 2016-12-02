@@ -68,9 +68,11 @@ class Netlist {
 		std::vector<Logic*> mults;
 		std::vector<Logic*> divmods;
 		std::vector<Logic*> logs;
+		std::vector<Logic*> ifs;
 		std::vector<Transition*> transitions;
 		std::vector<State*> states;
 		bool error;
+		int FDiteration;
 
 		int numAddSub;
 		int numMult;

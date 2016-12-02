@@ -22,6 +22,8 @@ class Connector{
 		bool get_sign() { return this->sign; }
 		int get_timeASAP() { return this->timeASAP; }
 		int get_timeALAP() { return this->timeALAP; }
+		int get_minASAP() { return this->minASAP; }
+		int get_maxALAP() { return this->maxALAP; }
 		bool get_schForce() { return this->schForce; }
 		//Set
 		void set_type(std::string type) { this->type = type; }
@@ -30,6 +32,8 @@ class Connector{
 		void set_sign(bool sign) { this->sign = sign; }
 		void set_timeASAP(int timeASAP) { this->timeASAP = timeASAP; }
 		void set_timeALAP(int timeALAP) { this->timeALAP = timeALAP; }
+		void set_minASAP(int minASAP) { this->minASAP = minASAP; }
+		void set_maxALAP(int maxALAP) { this->maxALAP = maxALAP; }
 		void set_schForce(bool schForce) { this->schForce = schForce; }
 	private:
 		std::string type;
@@ -38,6 +42,8 @@ class Connector{
 		bool sign;
 		int timeASAP;
 		int timeALAP;
+		int minASAP;
+		int maxALAP;
 		bool schForce;
 };
 

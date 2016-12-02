@@ -21,6 +21,9 @@ int main(int argc, char* argv[]) { //arguments: hlsyn(cmd) cFile(input) latency 
 		return -1;
 	}
 	Netlist netlist1(argv[1], argv[2]); //pass cFile(input) to constructor
+	if (netlist1.get_error()) {
+		return -1;
+	}
 	netlist1.ForceDir();
 	if (netlist1.get_error()) {
 		return -1;

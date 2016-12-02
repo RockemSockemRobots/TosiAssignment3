@@ -14,3 +14,6 @@ State::State(int name, std::vector<Transition*> inputTransitions, std::vector<Tr
 	this->outputTransitions = outputTransitions;
 	this->operations = operations;
 }
+State::State(int name) {
+	this->name = name;
+}

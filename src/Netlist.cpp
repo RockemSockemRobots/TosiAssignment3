@@ -62,6 +62,7 @@ Netlist.cpp
 #include "Netlist.h"
 
 Netlist::Netlist(std::string inputFile, std::string latency) {
+	this->FDiteration = 0;
 	this->numAddSub = 0;
 	this->numMult = 0;
 	this->numDivMod = 0;
@@ -88,16 +89,19 @@ bool Netlist::readIn(std::string inputFile) {
 	std::vector<Connector*> tempOutputs;
 	int tempsize;
 	int column;
+	Connector* lastestConn;
+	std::vector<Connector*> pendingConds;
 	
 	inFile.open(inputFile);
 	
 	//insert empty file logic
 
 	while (std::getline(inFile,line)) {
+		tempOutputs.clear();
 		line.erase(std::remove(line.begin(), line.end(), ','), line.end());
 		std::stringstream line_stream(line);
 		line_stream >> type_word;
-		if (line != "") {
+		if (type_word != "") {
 			if (type_word == "input" || type_word == "output" || type_word == "variable") {
 				line_stream >> sign_size_word;
 				std::size_t pos = sign_size_word.find_first_of("t");
@@ -117,11 +121,31 @@ bool Netlist::readIn(std::string inputFile) {
 				}
 				type_word = ""; sign_size_word = ""; name_word = ""; pos = 0; sign_word = ""; size_word = "";
 			}
-
 			// if statements
-
-			// for loops
-			
+			else if (type_word == "if") {
+				line_stream >> word2;
+				line_stream >> word3;
+				tempInputs = createCompInputs(word3);
+				if ((int)pendingConds.size() != 0) {
+					tempInputs.push_back(pendingConds.back());
+				}
+				tempOutputs.push_back(new Connector("ifTrue", false, "", word3 + "_true", (this->latency + 1), -1));
+				tempOutputs.push_back(new Connector("ifFalse", false, "", word3 + "_false", (this->latency + 1), -1));
+				this->logics.push_back(new Logic("if", "if (" + word3 + ")", tempInputs, tempOutputs, false, 1, "", -1, -1, "if"));
+				pendingConds.push_back(this->logics.back()->get_outputs().at(0));
+				this->ifs.push_back(this->logics.back());
+			}
+			else if (type_word == "else") {
+				for (int i = 0; i < (int)this->logics.size(); i++) {
+					if (this->logics.at(i)->get_outputs().at(0) == lastestConn) {
+						pendingConds.push_back(this->logics.at(i)->get_outputs().at(1));
+					}
+				}
+			}
+			else if (type_word == "}") {
+				lastestConn = pendingConds.back();
+				pendingConds.pop_back();
+			}
 			else {
 				//already have word1 as type_word
 				line_stream >> word2;
@@ -141,6 +165,9 @@ bool Netlist::readIn(std::string inputFile) {
 					case 0:
 						if (word5 != "1") {
 							tempInputs = createCompInputs(word3, word5);
+							if ((int)pendingConds.size() != 0) {
+								tempInputs.push_back(pendingConds.back());
+							}
 							tempOutputs = createCompOutputs(word4, type_word);
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
@@ -151,6 +178,9 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						else {
 							tempInputs = createCompInputs(word3);
+							if ((int)pendingConds.size() != 0) {
+								tempInputs.push_back(pendingConds.back());
+							}
 							tempOutputs = createCompOutputs(word4, type_word);
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
@@ -163,6 +193,9 @@ bool Netlist::readIn(std::string inputFile) {
 					case 1:
 						if (word5 != "1") {
 							tempInputs = createCompInputs(word3, word5);
+							if ((int)pendingConds.size() != 0) {
+								tempInputs.push_back(pendingConds.back());
+							}
 							tempOutputs = createCompOutputs(word4, type_word);
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
@@ -173,6 +206,9 @@ bool Netlist::readIn(std::string inputFile) {
 						}
 						else {
 							tempInputs = createCompInputs(word3);
+							if ((int)pendingConds.size() != 0) {
+								tempInputs.push_back(pendingConds.back());
+							}
 							tempOutputs = createCompOutputs(word4, type_word);
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
@@ -184,6 +220,9 @@ bool Netlist::readIn(std::string inputFile) {
 						break;
 					case 2:
 						tempInputs = createCompInputs(word3, word5);
+						if ((int)pendingConds.size() != 0) {
+							tempInputs.push_back(pendingConds.back());
+						}
 						tempOutputs = createCompOutputs(word4, type_word);
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
@@ -194,6 +233,9 @@ bool Netlist::readIn(std::string inputFile) {
 						break;
 					case 3:
 						tempInputs = createCompInputs(word3, word5);
+						if ((int)pendingConds.size() != 0) {
+							tempInputs.push_back(pendingConds.back());
+						}
 						tempOutputs = createCompOutputs(word4, type_word);
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
@@ -204,6 +246,9 @@ bool Netlist::readIn(std::string inputFile) {
 						break;
 					case 4:
 						tempInputs = createCompInputs(word3, word5);
+						if ((int)pendingConds.size() != 0) {
+							tempInputs.push_back(pendingConds.back());
+						}
 						tempOutputs = createCompOutputs(word4, type_word);
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
@@ -214,6 +259,9 @@ bool Netlist::readIn(std::string inputFile) {
 						break;
 					case 5:
 						tempInputs = createCompInputs(word3, word5);
+						if ((int)pendingConds.size() != 0) {
+							tempInputs.push_back(pendingConds.back());
+						}
 						tempOutputs = createCompOutputs(word4, type_word);
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
@@ -224,6 +272,9 @@ bool Netlist::readIn(std::string inputFile) {
 						break;
 					case 6:
 						tempInputs = createCompInputs(word3, word5);
+						if ((int)pendingConds.size() != 0) {
+							tempInputs.push_back(pendingConds.back());
+						}
 						tempOutputs = createCompOutputs(word4, type_word);
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
@@ -234,6 +285,9 @@ bool Netlist::readIn(std::string inputFile) {
 						break;
 					case 7:
 						tempInputs = createCompInputs(word3, word5);
+						if ((int)pendingConds.size() != 0) {
+							tempInputs.push_back(pendingConds.back());
+						}
 						tempOutputs = createCompOutputs(word4, type_word);
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
@@ -244,6 +298,9 @@ bool Netlist::readIn(std::string inputFile) {
 						break;
 					case 8:
 						tempInputs = createCompInputs(word3, word5);
+						if ((int)pendingConds.size() != 0) {
+							tempInputs.push_back(pendingConds.back());
+						}
 						tempOutputs = createCompOutputs(word4, type_word);
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
@@ -254,6 +311,9 @@ bool Netlist::readIn(std::string inputFile) {
 						break;
 					case 9:
 						tempInputs = createCompInputs(word3, word5);
+						if ((int)pendingConds.size() != 0) {
+							tempInputs.push_back(pendingConds.back());
+						}
 						tempOutputs = createCompOutputs(word4, type_word);
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
@@ -265,6 +325,9 @@ bool Netlist::readIn(std::string inputFile) {
 					case 10:
 						if (word6 == ":") {
 							tempInputs = createCompInputs(word5, word7, word3);
+							if ((int)pendingConds.size() != 0) {
+								tempInputs.push_back(pendingConds.back());
+							}
 							tempOutputs = createCompOutputs(word4, type_word);
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
@@ -578,6 +641,23 @@ std::vector<Connector*> Netlist::createCompOutputs(std::string word4, std::strin
 void Netlist::ForceDir() {
 	bool forceDirDone = false;
 	int count = 0;
+	for (int k = 0; k < (int)this->ifs.size(); k++) {
+		for (int l = 0; l < (int)this->ifs.at(k)->get_outputs().size(); l++) {
+			bool ifOutGoodGood = false;
+			for (int i = 0; i < (int)this->logics.size(); i++) {
+				for (int j = 0; j < (int)this->logics.at(i)->get_inputs().size(); j++) {
+					if (this->ifs.at(k)->get_outputs().at(l) == this->logics.at(i)->get_inputs().at(j)) {
+						ifOutGoodGood = true;
+					}
+				}
+			}
+			if (ifOutGoodGood == false) {
+				std::vector<Connector*> tempOuts = this->ifs.at(k)->get_outputs();
+				tempOuts.erase(tempOuts.begin() + l);
+				this->ifs.at(k)->set_outputs(tempOuts);
+			}
+		}
+	}
 	for (int i = 0; i != (int)this->logics.size(); i++) {
 		if (this->logics.at(i)->get_type() == "ADD" || this->logics.at(i)->get_type() == "INC" || this->logics.at(i)->get_type() == "SUB" || this->logics.at(i)->get_type() == "DEC") {
 			this->addsubs.push_back(this->logics.at(i));
@@ -588,7 +668,7 @@ void Netlist::ForceDir() {
 		else if (this->logics.at(i)->get_type() == "DIV" || this->logics.at(i)->get_type() == "MOD") {
 			this->divmods.push_back(this->logics.at(i));
 		}
-		else if (this->logics.at(i)->get_type() == "COMP" || this->logics.at(i)->get_type() == "SHR" || this->logics.at(i)->get_type() == "SHL" || this->logics.at(i)->get_type() == "MUX2x1") {
+		else if (this->logics.at(i)->get_type() == "COMP" || this->logics.at(i)->get_type() == "SHR" || this->logics.at(i)->get_type() == "SHL" || this->logics.at(i)->get_type() == "MUX2x1" || this->logics.at(i)->get_type() == "if") {
 			this->logs.push_back(this->logics.at(i));
 		}
 	}
@@ -626,6 +706,19 @@ void Netlist::ForceDir() {
 			}
 			this->outputs.at(i)->set_timeALAP(this->latency);
 		}
+		for (int i = 0; i < (int)this->variables.size(); i++) {
+			bool varGoodGood = false;
+			for (int j = 0; j < (int)this->logics.size(); j++) {
+				for (int k = 0; k < (int)this->logics.at(j)->get_inputs().size(); k++) {
+					if (this->variables.at(i) == this->logics.at(j)->get_inputs().at(k)) {
+						varGoodGood = true;
+					}
+				}
+			}
+			if (varGoodGood == false) {
+				this->variables.at(i)->set_timeALAP(this->latency);
+			}
+		}
 		if (this->calcTimeASAP() == false) {
 			this->error = true;
 			return;
@@ -639,6 +732,12 @@ void Netlist::ForceDir() {
 		this->calcSelfMatrix();
 		this->calcTotsMatrix();
 		this->schLowest();
+		for (int i = 0; i < (int)this->logics.size(); i++) {
+			this->logics.at(i)->set_minASAP(this->logics.at(i)->get_timeASAP());
+			this->logics.at(i)->set_maxALAP(this->logics.at(i)->get_timeALAP());
+		}
+		this->FDiteration = this->FDiteration + 1;
+		
 		
 		count = 0;
 		for (int i = 0; i != (int)this->logics.size(); i++) {
@@ -671,11 +770,22 @@ bool Netlist::calcTimeASAP() {
 					}
 					if (goodgoodInputs == true) {
 						//schedule the node, set the schASAP flag
-						this->logics.at(i)->set_timeASAP(layer);
-						this->logics.at(i)->set_schASAP(true);
-						for (int k = 0; k != (int)this->logics.at(i)->get_outputs().size(); k++) {
-							if (this->logics.at(i)->get_outputs().at(k)->get_schForce() == false) {
-								this->logics.at(i)->get_outputs().at(k)->set_timeASAP(layer + this->logics.at(i)->get_delay());
+						if (layer >= this->logics.at(i)->get_minASAP() || this->FDiteration == 0) {
+							this->logics.at(i)->set_timeASAP(layer);
+							this->logics.at(i)->set_schASAP(true);
+							for (int k = 0; k != (int)this->logics.at(i)->get_outputs().size(); k++) {
+								if (layer + this->logics.at(i)->get_delay() >= this->logics.at(i)->get_outputs().at(k)->get_timeASAP() || this->logics.at(i)->get_outputs().at(k)->get_timeASAP() == (this->latency + 1)) {
+									this->logics.at(i)->get_outputs().at(k)->set_timeASAP(layer + this->logics.at(i)->get_delay());
+								}
+							}
+						}
+						else {
+							this->logics.at(i)->set_timeASAP(this->logics.at(i)->get_minASAP());
+							this->logics.at(i)->set_schASAP(true);
+							for (int k = 0; k != (int)this->logics.at(i)->get_outputs().size(); k++) {
+								if (layer + this->logics.at(i)->get_delay() >= this->logics.at(i)->get_outputs().at(k)->get_timeASAP() || this->logics.at(i)->get_outputs().at(k)->get_timeASAP() == (this->latency + 1)) {
+									this->logics.at(i)->get_outputs().at(k)->set_timeASAP(this->logics.at(i)->get_minASAP() + this->logics.at(i)->get_delay());
+								}
 							}
 						}
 					}
@@ -712,11 +822,22 @@ bool Netlist::calcTimeALAP() {
 					}
 				}
 				if (goodgoodOutputs == true && goodgoodLayer == true) {
-					this->logics.at(i)->set_timeALAP(layer - this->logics.at(i)->get_delay() + 1);
-					this->logics.at(i)->set_schALAP(true);
-					for (int j = 0; j != (int)this->logics.at(i)->get_inputs().size(); j++) {
-						if (this->logics.at(i)->get_inputs().at(j)->get_schForce() == false) {
-							this->logics.at(i)->get_inputs().at(j)->set_timeALAP(layer - this->logics.at(i)->get_delay());
+					if ((layer - this->logics.at(i)->get_delay() + 1) <= this->logics.at(i)->get_maxALAP() || this->FDiteration == 0) {
+						this->logics.at(i)->set_timeALAP(layer - this->logics.at(i)->get_delay() + 1);
+						this->logics.at(i)->set_schALAP(true);
+						for (int j = 0; j != (int)this->logics.at(i)->get_inputs().size(); j++) {
+							if ((layer - this->logics.at(i)->get_delay()) <= this->logics.at(i)->get_inputs().at(j)->get_timeALAP() || this->logics.at(i)->get_inputs().at(j)->get_timeALAP() == -1) {
+								this->logics.at(i)->get_inputs().at(j)->set_timeALAP(layer - this->logics.at(i)->get_delay());
+							}
+						}
+					}
+					else {
+						this->logics.at(i)->set_timeALAP(this->logics.at(i)->get_maxALAP() - this->logics.at(i)->get_delay() + 1);
+						this->logics.at(i)->set_schALAP(true);
+						for (int j = 0; j != (int)this->logics.at(i)->get_inputs().size(); j++) {
+							if ((layer - this->logics.at(i)->get_delay()) <= this->logics.at(i)->get_inputs().at(j)->get_timeALAP() || this->logics.at(i)->get_inputs().at(j)->get_timeALAP() == -1) {
+								this->logics.at(i)->get_inputs().at(j)->set_timeALAP(this->logics.at(i)->get_maxALAP() - this->logics.at(i)->get_delay());
+							}
 						}
 					}
 				}
@@ -743,6 +864,8 @@ void Netlist::calcProbMatrix() {
 		layer = 0;
 		std::vector<double> tempNodeVect = {};
 		while (layer != latency) {
+			int tempASAP = this->addsubs.at(node)->get_timeASAP();
+			int tempALAP = this->addsubs.at(node)->get_timeALAP();
 			if ((layer+1) < this->addsubs.at(node)->get_timeASAP() || (layer+1) > this->addsubs.at(node)->get_timeALAP()) {
 				tempNodeVect.push_back(0);
 			}
@@ -979,18 +1102,20 @@ void Netlist::calcTotsMatrix() {
 			if ((layer + 1) < this->addsubs.at(node)->get_timeASAP() || (layer + 1) > this->addsubs.at(node)->get_timeALAP()) {
 				tempNodeVect.push_back(1000);
 			}
+			// node = current node being evaluated
+			// i = go through inputs of current node being eval'd
+			// j = go through nodes in logics
+			// k = go through outputs of node j
 			else {
 				for (int i = 0; i != (int)this->addsubs.at(node)->get_inputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
-						for (int k = 0; k != (int)this->logics.at(j)->get_outputs().size(); k++) {
-							if (this->addsubs.at(node)->get_inputs().at(i) == this->logics.at(j)->get_outputs().at(k)) {
-								tempTimeASAP = this->logics.at(j)->get_timeASAP();
-								tempTimeALAP = this->logics.at(j)->get_timeALAP();
-								if (tempTimeALAP == (layer + 1) - (this->addsubs.at(node)->get_delay() - 1)) {
-									tempTimeALAP = (layer + 1) - this->addsubs.at(node)->get_delay();
-								}
-								if ((tempTimeALAP - tempTimeASAP) == 0) {
-									predForce = predForce + this->logics.at(j)->get_selfForces().at(tempTimeASAP - 1);
+						if (this->addsubs.at(node) != this->logics.at(j)) {
+							for (int k = 0; k != (int)this->logics.at(j)->get_outputs().size(); k++) {
+								if (this->addsubs.at(node)->get_inputs().at(i) == this->logics.at(j)->get_outputs().at(k)) {
+									tempTimeASAP = this->logics.at(j)->get_timeASAP();
+									if (layer + 1 == tempTimeASAP + this->logics.at(j)->get_delay()) {
+										predForce = predForce + this->logics.at(j)->get_selfForces().at(tempTimeASAP - 1);
+									}
 								}
 							}
 						}
@@ -998,15 +1123,13 @@ void Netlist::calcTotsMatrix() {
 				}
 				for (int i = 0; i != (int)this->addsubs.at(node)->get_outputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
-						for (int k = 0; k != (int)this->logics.at(j)->get_inputs().size(); k++) {
-							if (this->addsubs.at(node)->get_outputs().at(i) == this->logics.at(j)->get_inputs().at(k)) {
-								tempTimeASAP = this->logics.at(j)->get_timeASAP();
-								tempTimeALAP = this->logics.at(j)->get_timeALAP();
-								if (tempTimeASAP <= (layer + 1) + (this->addsubs.at(node)->get_delay() - 1)) {
-									tempTimeASAP = (layer + 1) + this->addsubs.at(node)->get_delay();
-								}
-								if ((tempTimeALAP - tempTimeASAP) == 0) {
-									succForce = succForce + this->logics.at(j)->get_selfForces().at(tempTimeALAP - 1);
+						if (this->addsubs.at(node) != this->logics.at(j)) {
+							for (int k = 0; k != (int)this->logics.at(j)->get_inputs().size(); k++) {
+								if (this->addsubs.at(node)->get_outputs().at(i) == this->logics.at(j)->get_inputs().at(k)) {
+									tempTimeALAP = this->logics.at(j)->get_timeALAP();
+									if (layer + 1 == tempTimeALAP - this->addsubs.at(node)->get_delay()) {
+										succForce = succForce + this->logics.at(j)->get_selfForces().at(tempTimeALAP - 1);
+									}
 								}
 							}
 						}
@@ -1034,15 +1157,13 @@ void Netlist::calcTotsMatrix() {
 			else {
 				for (int i = 0; i != (int)this->mults.at(node)->get_inputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
-						for (int k = 0; k != (int)this->logics.at(j)->get_outputs().size(); k++) {
-							if (this->mults.at(node)->get_inputs().at(i) == this->logics.at(j)->get_outputs().at(k)) {
-								tempTimeASAP = this->logics.at(j)->get_timeASAP();
-								tempTimeALAP = this->logics.at(j)->get_timeALAP();
-								if (tempTimeALAP == (layer + 1) - (this->mults.at(node)->get_delay() - 1)) {
-									tempTimeALAP = (layer + 1) - this->mults.at(node)->get_delay();
-								}
-								if ((tempTimeALAP - tempTimeASAP) == 0) {
-									predForce = predForce + this->logics.at(j)->get_selfForces().at(tempTimeASAP - 1);
+						if (this->mults.at(node) != this->logics.at(j)) {
+							for (int k = 0; k != (int)this->logics.at(j)->get_outputs().size(); k++) {
+								if (this->mults.at(node)->get_inputs().at(i) == this->logics.at(j)->get_outputs().at(k)) {
+									tempTimeASAP = this->logics.at(j)->get_timeASAP();
+									if (layer + 1 == tempTimeASAP + this->logics.at(j)->get_delay()) {
+										predForce = predForce + this->logics.at(j)->get_selfForces().at(tempTimeASAP - 1);
+									}
 								}
 							}
 						}
@@ -1050,15 +1171,13 @@ void Netlist::calcTotsMatrix() {
 				}
 				for (int i = 0; i != (int)this->mults.at(node)->get_outputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
-						for (int k = 0; k != (int)this->logics.at(j)->get_inputs().size(); k++) {
-							if (this->mults.at(node)->get_outputs().at(i) == this->logics.at(j)->get_inputs().at(k)) {
-								tempTimeASAP = this->logics.at(j)->get_timeASAP();
-								tempTimeALAP = this->logics.at(j)->get_timeALAP();
-								if (tempTimeASAP == (layer + 1) + (this->mults.at(node)->get_delay() - 1)) {
-									tempTimeASAP = (layer + 1) + this->mults.at(node)->get_delay();
-								}
-								if ((tempTimeALAP - tempTimeASAP) == 0) {
-									succForce = succForce + this->logics.at(j)->get_selfForces().at(tempTimeALAP - 1);
+						if (this->mults.at(node) != this->logics.at(j)) {
+							for (int k = 0; k != (int)this->logics.at(j)->get_inputs().size(); k++) {
+								if (this->mults.at(node)->get_outputs().at(i) == this->logics.at(j)->get_inputs().at(k)) {
+									tempTimeALAP = this->logics.at(j)->get_timeALAP();
+									if (layer + 1 == tempTimeALAP - this->mults.at(node)->get_delay()) {
+										succForce = succForce + this->logics.at(j)->get_selfForces().at(tempTimeALAP - 1);
+									}
 								}
 							}
 						}
@@ -1086,15 +1205,13 @@ void Netlist::calcTotsMatrix() {
 			else {
 				for (int i = 0; i != (int)this->divmods.at(node)->get_inputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
-						for (int k = 0; k != (int)this->logics.at(j)->get_outputs().size(); k++) {
-							if (this->divmods.at(node)->get_inputs().at(i) == this->logics.at(j)->get_outputs().at(k)) {
-								tempTimeASAP = this->logics.at(j)->get_timeASAP();
-								tempTimeALAP = this->logics.at(j)->get_timeALAP();
-								if (tempTimeALAP == (layer + 1) - (this->divmods.at(node)->get_delay() - 1)) {
-									tempTimeALAP = (layer + 1) - this->divmods.at(node)->get_delay();
-								}
-								if ((tempTimeALAP - tempTimeASAP) == 0) {
-									predForce = predForce + this->logics.at(j)->get_selfForces().at(tempTimeASAP - 1);
+						if (this->divmods.at(node) != this->logics.at(j)) {
+							for (int k = 0; k != (int)this->logics.at(j)->get_outputs().size(); k++) {
+								if (this->divmods.at(node)->get_inputs().at(i) == this->logics.at(j)->get_outputs().at(k)) {
+									tempTimeASAP = this->logics.at(j)->get_timeASAP();
+									if (layer + 1 == tempTimeASAP + this->logics.at(j)->get_delay()) {
+										predForce = predForce + this->logics.at(j)->get_selfForces().at(tempTimeASAP - 1);
+									}
 								}
 							}
 						}
@@ -1102,15 +1219,13 @@ void Netlist::calcTotsMatrix() {
 				}
 				for (int i = 0; i != (int)this->divmods.at(node)->get_outputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
-						for (int k = 0; k != (int)this->logics.at(j)->get_inputs().size(); k++) {
-							if (this->divmods.at(node)->get_outputs().at(i) == this->logics.at(j)->get_inputs().at(k)) {
-								tempTimeASAP = this->logics.at(j)->get_timeASAP();
-								tempTimeALAP = this->logics.at(j)->get_timeALAP();
-								if (tempTimeASAP == (layer + 1) + (this->divmods.at(node)->get_delay() - 1)) {
-									tempTimeASAP = (layer + 1) + this->divmods.at(node)->get_delay();
-								}
-								if ((tempTimeALAP - tempTimeASAP) == 0) {
-									succForce = succForce + this->logics.at(j)->get_selfForces().at(tempTimeALAP - 1);
+						if (this->divmods.at(node) != this->logics.at(j)) {
+							for (int k = 0; k != (int)this->logics.at(j)->get_inputs().size(); k++) {
+								if (this->divmods.at(node)->get_outputs().at(i) == this->logics.at(j)->get_inputs().at(k)) {
+									tempTimeALAP = this->logics.at(j)->get_timeALAP();
+									if (layer + 1 == tempTimeALAP - this->divmods.at(node)->get_delay()) {
+										succForce = succForce + this->logics.at(j)->get_selfForces().at(tempTimeALAP - 1);
+									}
 								}
 							}
 						}
@@ -1132,21 +1247,20 @@ void Netlist::calcTotsMatrix() {
 		succForce = 0;
 		std::vector<double> tempNodeVect = {};
 		while (layer != latency) {
+			predForce = 0; succForce = 0;
 			if ((layer + 1) < this->logs.at(node)->get_timeASAP() || (layer + 1) > this->logs.at(node)->get_timeALAP()) {
 				tempNodeVect.push_back(1000);
 			}
 			else {
 				for (int i = 0; i != (int)this->logs.at(node)->get_inputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
-						for (int k = 0; k != (int)this->logics.at(j)->get_outputs().size(); k++) {
-							if (this->logs.at(node)->get_inputs().at(i) == this->logics.at(j)->get_outputs().at(k)) {
-								tempTimeASAP = this->logics.at(j)->get_timeASAP();
-								tempTimeALAP = this->logics.at(j)->get_timeALAP();
-								if (tempTimeALAP == (layer + 1) - (this->logs.at(node)->get_delay() - 1)) {
-									tempTimeALAP = (layer + 1) - this->logs.at(node)->get_delay();
-								}
-								if ((tempTimeALAP - tempTimeASAP) == 0) {
-									predForce = predForce + this->logics.at(j)->get_selfForces().at(tempTimeASAP - 1);
+						if (this->logs.at(node) != this->logics.at(j)) {
+							for (int k = 0; k != (int)this->logics.at(j)->get_outputs().size(); k++) {
+								if (this->logs.at(node)->get_inputs().at(i) == this->logics.at(j)->get_outputs().at(k)) {
+									tempTimeASAP = this->logics.at(j)->get_timeASAP();
+									if (layer + 1 == tempTimeASAP + this->logics.at(j)->get_delay()) {
+										predForce = predForce + this->logics.at(j)->get_selfForces().at(tempTimeASAP - 1);
+									}
 								}
 							}
 						}
@@ -1154,15 +1268,13 @@ void Netlist::calcTotsMatrix() {
 				}
 				for (int i = 0; i != (int)this->logs.at(node)->get_outputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
-						for (int k = 0; k != (int)this->logics.at(j)->get_inputs().size(); k++) {
-							if (this->logs.at(node)->get_outputs().at(i) == this->logics.at(j)->get_inputs().at(k)) {
-								tempTimeASAP = this->logics.at(j)->get_timeASAP();
-								tempTimeALAP = this->logics.at(j)->get_timeALAP();
-								if (tempTimeASAP == (layer + 1) + (this->logs.at(node)->get_delay() - 1)) {
-									tempTimeASAP = (layer + 1) + this->logs.at(node)->get_delay();
-								}
-								if ((tempTimeALAP - tempTimeASAP) == 0) {
-									succForce = succForce + this->logics.at(j)->get_selfForces().at(tempTimeALAP - 1);
+						if (this->logs.at(node) != this->logics.at(j)) {
+							for (int k = 0; k != (int)this->logics.at(j)->get_inputs().size(); k++) {
+								if (this->logs.at(node)->get_outputs().at(i) == this->logics.at(j)->get_inputs().at(k)) {
+									tempTimeALAP = this->logics.at(j)->get_timeALAP();
+									if (layer + 1 == tempTimeALAP - this->logs.at(node)->get_delay()) {
+										succForce = succForce + this->logics.at(j)->get_selfForces().at(tempTimeALAP - 1);
+									}
 								}
 							}
 						}
@@ -1188,7 +1300,7 @@ void Netlist::schLowest() {
 	Logic* tempNode;
 	for (int i = 0; i != (int)this->logics.size(); i++) {
 		for (int layer = 0; layer != this->latency; layer++) {
-			if (this->logics.at(i)->get_totsForces().at(layer) < tempLowest && this->logics.at(i)->get_schForce() == false) {
+			if (this->logics.at(i)->get_totsForces().at(layer) <= tempLowest && this->logics.at(i)->get_schForce() == false) {
 				tempLowest = this->logics.at(i)->get_totsForces().at(layer);
 				tempLayer = layer;
 				tempNode = this->logics.at(i);
@@ -1200,11 +1312,11 @@ void Netlist::schLowest() {
 	tempNode->set_schForce(true);
 	for (int i = 0; i != (int)tempNode->get_outputs().size(); i++) {
 		tempNode->get_outputs().at(i)->set_timeASAP(tempLayer + 1 + tempNode->get_delay());
-		tempNode->get_outputs().at(i)->set_timeALAP(tempLayer + 1 + tempNode->get_delay());
+		//tempNode->get_outputs().at(i)->set_timeALAP(tempLayer + 1 + tempNode->get_delay());
 		tempNode->get_outputs().at(i)->set_schForce(true);
 	}
 	for (int i = 0; i != (int)tempNode->get_inputs().size(); i++) {
-		tempNode->get_inputs().at(i)->set_timeASAP(tempLayer + 1 - tempNode->get_delay());
+		//tempNode->get_inputs().at(i)->set_timeASAP(tempLayer + 1 - tempNode->get_delay());
 		tempNode->get_inputs().at(i)->set_timeALAP(tempLayer + 1 - tempNode->get_delay());
 		tempNode->get_inputs().at(i)->set_schForce(true);
 	}
@@ -1216,9 +1328,44 @@ void Netlist::schLowest() {
 // Populate states and transitions based on Force-Directed scheduling
 
 void Netlist::populate() {
-	int numTrans = this->latency + 1;
-	int numStates = this->latency;
-	for (int i = 1; i <= numTrans; i++) {
+	int numStates = 0;
+	int numTrans = 1;
+	int ifCount = 1;
+	std::vector<int> statesPerL;
+	for (int i = 1; i <= this->latency; i++) {
+		numStates = numStates + ifCount;
+		statesPerL.push_back(ifCount);
+		for (int j = 0; j < (int)this->logics.size(); j++) {
+			if (i == this->logics.at(j)->get_timeASAP() && this->logics.at(j)->get_type() == "if") {
+				ifCount++;
+			}
+		}
+		numTrans = numTrans + ifCount;
+	}
+	for (int stateNum = 1; stateNum <= numStates; stateNum++) {
+		this->states.push_back(new State(stateNum));
+	}
+	int statePos = 0;
+	for (int i = 0; i < (int)statesPerL.size(); i++) {
+		while (statesPerL.at(i) > 0) {
+			this->states.at(statePos)->set_latency(i + 1);
+			statePos++;
+			statesPerL.at(i)--;
+		}
+	}
+	std::vector<Logic*> tempOps;
+	for (int statePos = 0; statePos < (int)this->states.size(); statePos++) {
+		tempOps.clear();
+		for (int i = 0; i < (int)this->logics.size(); i++) {
+			if (this->logics.at(i)->get_timeASAP() == this->states.at(statePos)->get_latency()) {
+				tempOps.push_back(this->logics.at(i));
+			}
+		}
+		this->states.at(statePos)->set_operations(tempOps);
+	}
+	int test = 1;
+}
+/*	for (int i = 1; i <= numTrans; i++) {
 		this->transitions.push_back(new Transition(i - 1, i, ""));
 	}
 	std::vector<Logic*> tempOps;
@@ -1241,4 +1388,4 @@ void Netlist::populate() {
 		}
 		this->states.push_back(new State(layer, tempIns, tempOuts, tempOps));
 	}
-}
+	*/
