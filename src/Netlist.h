@@ -1,7 +1,7 @@
 /****************************************
 Authors: Justin Siekmann, Anthony Ciancio
 NetIDs : jsiekmann, shjay
-Date : 29 November 2016
+Date : 7 December 2016
 Assignment #3
 
 Netlist.h

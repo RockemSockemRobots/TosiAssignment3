@@ -1,64 +1,12 @@
 /****************************************
 Authors: Justin Siekmann, Anthony Ciancio
 NetIDs : jsiekmann, shjay
-Date : 29 November 2016
+Date : 7 December 2016
 Assignment #3
 
 Netlist.cpp
 *****************************************/
-/*
-	Force calculation:
-	******************
 
-	// 1. populate probs_ matrices for addsub, mult, div, log
-			- column 1 stores the vertex number
-	// 2. populate dist_ ""
-			- ""
-	// 3. populate selfForces matrix
-			- if there is a 0 in the probs_ matrix for that slot, set to 0
-			- else, calculate selfForce = dist1*(1/0 - probs)
-	// 4. populate totalForces matrix
-			- pred force = self force of immediate above node(s) that are forced into a time slot
-			- succ force = self force of immediate below node(s) that are forced into a time slot
-			- total force = self + pred + succ
-	// 5. choose the lowest totalForce value
-	// 6. overwrite timeASAP and timeALAP of that node with scheduled time; scheduleFlag = 1
-	// 7. Check scheduleFlags of every node. Repeat 1-6 until every scheduleFlag == 1
-
-*/
-
-/*	NOTES
-	*****
-	- change output vector of a logic piece to just be one output
-	- Logic
-		- timeASAP
-		- timeALAP
-		- inputConnectors (vector)
-		- outputConnectors (vector)
-		- change the delay (from table to standard on logic type)
-		- logicDependency
-	- Connector
-		- timeASAP
-		- timeALAP
-	- State (object/vector)
-		- name
-		- logics (vector)
-		- input transitions (vector)
-		- output transitions (vector)
-	- Transition (object/vector)
-		- name
-		- startState
-		- endState
-		- condition
-	- stateRegister
-	- output Verilog code as states
-	- algorithm to optimize
-		- unscheduled graph
-		- ASAP calculation
-		- ALAP calculation
-		- force directed algorithm
-	- error for latency incompatability
-*/
 #include "Netlist.h"
 
 Netlist::Netlist(std::string inputFile, std::string latency) {
@@ -449,9 +397,15 @@ void Netlist::writeOut(std::string outputFile) {
 	for (int i = 0; i < (int)this->states.size(); i++) {
 		outFile << "\t\t\t\t" << this->states.at(i)->get_name() << ": begin" << std::endl;
 		for (int j = 0; j < (int)this->states.at(i)->get_operations().size(); j++) {
-			outFile << "\t\t\t\t\t" << this->states.at(i)->get_operations().at(j)->get_outputs().at(0)->get_name();
-			outFile << " <= ";
-			if (this->states.at(i)->get_operations().at(j)->get_type() == "MUX2x1") {
+
+			// need to check if the operation is an IF
+			if (this->states.at(i)->get_operations().at(j)->get_type() == "if") {
+				// if the operation is an "IF", we do nothing here, we take care of this later
+			}
+			// need to check if the operation is a MUX
+			else if (this->states.at(i)->get_operations().at(j)->get_type() == "MUX2x1") {
+				outFile << "\t\t\t\t\t" << this->states.at(i)->get_operations().at(j)->get_outputs().at(0)->get_name();
+				outFile << " <= ";
 				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(2)->get_name();
 				outFile << " ? ";
 				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(0)->get_name();
@@ -459,17 +413,24 @@ void Netlist::writeOut(std::string outputFile) {
 				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(1)->get_name();
 				outFile << ";" << std::endl;
 			}
+			// this handles all other operation types
 			else {
+				outFile << "\t\t\t\t\t" << this->states.at(i)->get_operations().at(j)->get_outputs().at(0)->get_name();
+				outFile << " <= ";
 				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(0)->get_name();
 				outFile << " " << this->states.at(i)->get_operations().at(j)->get_typeSymbol() << " ";
 				outFile << this->states.at(i)->get_operations().at(j)->get_inputs().at(1)->get_name();
 				outFile << ";" << std::endl;
 			}
 		}
+		// print the transition into the Final State
 		if (this->states.at(i)->get_name() == (int)this->states.size()) {
 			outFile << "\t\t\t\t\t" << "State <= Final;" << std::endl;
 			outFile << "\t\t\t\t" << "end" << std::endl;
 		}
+		// this prints the transitions between each state
+		// we need to edit this because right now it just prints State number + 1
+		// also need to print the if condition here if there is an if statement in this state
 		else {
 			outFile << "\t\t\t\t\t" << "State <= " << this->states.at(i)->get_name() + 1 << ";" << std::endl;
 			outFile << "\t\t\t\t" << "end" << std::endl;
@@ -855,7 +816,6 @@ bool Netlist::calcTimeALAP() {
 }
 
 // 3. Populate the resource probability matrix for each resource type
-
 void Netlist::calcProbMatrix() {	
 	// add/sub
 	int node = 0;
@@ -1102,10 +1062,6 @@ void Netlist::calcTotsMatrix() {
 			if ((layer + 1) < this->addsubs.at(node)->get_timeASAP() || (layer + 1) > this->addsubs.at(node)->get_timeALAP()) {
 				tempNodeVect.push_back(1000);
 			}
-			// node = current node being evaluated
-			// i = go through inputs of current node being eval'd
-			// j = go through nodes in logics
-			// k = go through outputs of node j
 			else {
 				for (int i = 0; i != (int)this->addsubs.at(node)->get_inputs().size(); i++) {
 					for (int j = 0; j != (int)this->logics.size(); j++) {
@@ -1312,11 +1268,9 @@ void Netlist::schLowest() {
 	tempNode->set_schForce(true);
 	for (int i = 0; i != (int)tempNode->get_outputs().size(); i++) {
 		tempNode->get_outputs().at(i)->set_timeASAP(tempLayer + 1 + tempNode->get_delay());
-		//tempNode->get_outputs().at(i)->set_timeALAP(tempLayer + 1 + tempNode->get_delay());
 		tempNode->get_outputs().at(i)->set_schForce(true);
 	}
 	for (int i = 0; i != (int)tempNode->get_inputs().size(); i++) {
-		//tempNode->get_inputs().at(i)->set_timeASAP(tempLayer + 1 - tempNode->get_delay());
 		tempNode->get_inputs().at(i)->set_timeALAP(tempLayer + 1 - tempNode->get_delay());
 		tempNode->get_inputs().at(i)->set_schForce(true);
 	}
