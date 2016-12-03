@@ -79,7 +79,7 @@ bool Netlist::readIn(std::string inputFile) {
 				}
 				tempOutputs.push_back(new Connector("ifTrue", false, "", word3 + "_true", (this->latency + 1), -1));
 				tempOutputs.push_back(new Connector("ifFalse", false, "", word3 + "_false", (this->latency + 1), -1));
-				this->logics.push_back(new Logic("if", "if (" + word3 + ")", tempInputs, tempOutputs, false, 1, "", -1, -1, "if"));
+				this->logics.push_back(new Logic("if", "if (" + word3 + ")", tempInputs, tempOutputs, false, 1, "", -1, -1, "if", pendingConds));
 				pendingConds.push_back(this->logics.back()->get_outputs().at(0));
 				this->ifs.push_back(this->logics.back());
 			}
@@ -120,7 +120,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("ADD", "add" + std::to_string(ADDs), tempInputs, tempOutputs, false, 1, "", -1, -1, "+"));
+							this->logics.push_back(new Logic("ADD", "add" + std::to_string(ADDs), tempInputs, tempOutputs, false, 1, "", -1, -1, "+", pendingConds));
 							ADDs++;
 							this->numAddSub++;
 						}
@@ -133,7 +133,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("INC", "inc" + std::to_string(INCs), tempInputs, tempOutputs, false, 1, "", -1, -1, "+"));
+							this->logics.push_back(new Logic("INC", "inc" + std::to_string(INCs), tempInputs, tempOutputs, false, 1, "", -1, -1, "+", pendingConds));
 							INCs++;
 							this->numAddSub++;
 						}
@@ -148,7 +148,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("SUB", "sub" + std::to_string(SUBs), tempInputs, tempOutputs, false, 1, "", -1, -1, "-"));
+							this->logics.push_back(new Logic("SUB", "sub" + std::to_string(SUBs), tempInputs, tempOutputs, false, 1, "", -1, -1, "-", pendingConds));
 							SUBs++;
 							this->numAddSub++;
 						}
@@ -161,7 +161,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("DEC", "dec" + std::to_string(DECs), tempInputs, tempOutputs, false, 1, "", -1, -1, "-"));
+							this->logics.push_back(new Logic("DEC", "dec" + std::to_string(DECs), tempInputs, tempOutputs, false, 1, "", -1, -1, "-", pendingConds));
 							DECs++;
 							this->numAddSub++;
 						}
@@ -175,7 +175,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("MUL", "mul" + std::to_string(MULs), tempInputs, tempOutputs, false, 2, "", -1, -1, "*"));
+						this->logics.push_back(new Logic("MUL", "mul" + std::to_string(MULs), tempInputs, tempOutputs, false, 2, "", -1, -1, "*", pendingConds));
 						MULs++;
 						this->numMult++;
 						break;
@@ -188,7 +188,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "gt", -1, -1, ">"));
+						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "gt", -1, -1, ">", pendingConds));
 						COMPs++;
 						this->numLog++;
 						break;
@@ -201,7 +201,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "lt", -1, -1, "<"));
+						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "lt", -1, -1, "<", pendingConds));
 						COMPs++;
 						this->numLog++;
 						break;
@@ -214,7 +214,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "eq", -1, -1, "=="));
+						this->logics.push_back(new Logic("COMP", "comp" + std::to_string(COMPs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "eq", -1, -1, "==", pendingConds));
 						COMPs++;
 						this->numLog++;
 						break;
@@ -227,7 +227,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("SHR", "shr" + std::to_string(SHRs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "", -1, -1, ">>"));
+						this->logics.push_back(new Logic("SHR", "shr" + std::to_string(SHRs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 1, "", -1, -1, ">>", pendingConds));
 						SHRs++;
 						this->numLog++;
 						break;
@@ -240,7 +240,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("SHL", "shl" + std::to_string(SHLs), tempInputs, tempOutputs, false, 1, "", -1, -1, "<<"));
+						this->logics.push_back(new Logic("SHL", "shl" + std::to_string(SHLs), tempInputs, tempOutputs, false, 1, "", -1, -1, "<<", pendingConds));
 						SHLs++;
 						this->numLog++;
 						break;
@@ -253,7 +253,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("DIV", "div" + std::to_string(DIVs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1, "/"));
+						this->logics.push_back(new Logic("DIV", "div" + std::to_string(DIVs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1, "/", pendingConds));
 						DIVs++;
 						this->numDivMod++;
 						break;
@@ -266,7 +266,7 @@ bool Netlist::readIn(std::string inputFile) {
 						if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 							return true;
 						}
-						this->logics.push_back(new Logic("MOD", "mod" + std::to_string(MODs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1, "%"));
+						this->logics.push_back(new Logic("MOD", "mod" + std::to_string(MODs), tempInputs, tempOutputs, checkSign(tempInputs, tempOutputs), 3, "", -1, -1, "%", pendingConds));
 						MODs++;
 						this->numDivMod++;
 						break;
@@ -280,7 +280,7 @@ bool Netlist::readIn(std::string inputFile) {
 							if (tempOutputs.size() == 0 || tempInputs.size() == 0) {
 								return true;
 							}
-							this->logics.push_back(new Logic("MUX2x1", "mux" + std::to_string(MUX2x1s), tempInputs, tempOutputs, false, 1, "", -1, -1, "?"));
+							this->logics.push_back(new Logic("MUX2x1", "mux" + std::to_string(MUX2x1s), tempInputs, tempOutputs, false, 1, "", -1, -1, "?", pendingConds));
 							MUX2x1s++;
 							this->numLog++;
 						}
@@ -395,12 +395,12 @@ void Netlist::writeOut(std::string outputFile) {
 	outFile << "\t\t\t\t" << "end" << std::endl;
 
 	for (int i = 0; i < (int)this->states.size(); i++) {
+		std::string tempIfCond = "";
 		outFile << "\t\t\t\t" << this->states.at(i)->get_name() << ": begin" << std::endl;
 		for (int j = 0; j < (int)this->states.at(i)->get_operations().size(); j++) {
 
-			// need to check if the operation is an IF
 			if (this->states.at(i)->get_operations().at(j)->get_type() == "if") {
-				// if the operation is an "IF", we do nothing here, we take care of this later
+				tempIfCond = this->states.at(i)->get_operations().at(j)->get_inputs().at(0)->get_name();
 			}
 			// need to check if the operation is a MUX
 			else if (this->states.at(i)->get_operations().at(j)->get_type() == "MUX2x1") {
@@ -424,15 +424,20 @@ void Netlist::writeOut(std::string outputFile) {
 			}
 		}
 		// print the transition into the Final State
-		if (this->states.at(i)->get_name() == (int)this->states.size()) {
+		if (this->states.at(i)->get_latency() == this->latency) {
 			outFile << "\t\t\t\t\t" << "State <= Final;" << std::endl;
 			outFile << "\t\t\t\t" << "end" << std::endl;
 		}
-		// this prints the transitions between each state
-		// we need to edit this because right now it just prints State number + 1
-		// also need to print the if condition here if there is an if statement in this state
+		else if (this->states.at(i)->get_outputTransitions().size() == 2) {
+			outFile << "\t\t\t\t\t" << "if (" << tempIfCond << ") begin" << std::endl;
+			outFile << "\t\t\t\t\t\t" << "State <= " << this->states.at(i)->get_outputTransitions().at(0)->get_dst() << ";" << std::endl;
+			outFile << "\t\t\t\t\t" << "end" << std::endl;
+			outFile << "\t\t\t\t\t" << "else begin" << std::endl;
+			outFile << "\t\t\t\t\t\t" << "State <= " << this->states.at(i)->get_outputTransitions().at(1)->get_dst() << ";" << std::endl;
+			outFile << "\t\t\t\t\t" << "end" << std::endl;
+		}
 		else {
-			outFile << "\t\t\t\t\t" << "State <= " << this->states.at(i)->get_name() + 1 << ";" << std::endl;
+			outFile << "\t\t\t\t\t" << "State <= " << this->states.at(i)->get_outputTransitions().at(0)->get_dst() << ";" << std::endl;
 			outFile << "\t\t\t\t" << "end" << std::endl;
 		}
 	}
@@ -614,6 +619,8 @@ void Netlist::ForceDir() {
 			}
 			if (ifOutGoodGood == false) {
 				std::vector<Connector*> tempOuts = this->ifs.at(k)->get_outputs();
+				Connector* tempDel = this->ifs.at(k)->get_outputs().at(1);
+				this->ifs.at(k)->set_deleted(tempDel);
 				tempOuts.erase(tempOuts.begin() + l);
 				this->ifs.at(k)->set_outputs(tempOuts);
 			}
@@ -1286,6 +1293,15 @@ void Netlist::populate() {
 	int numTrans = 1;
 	int ifCount = 1;
 	std::vector<int> statesPerL;
+	std::vector<Connector*> tempOuts;
+	for (int i = 0; i < (int)this->ifs.size(); i++) {
+		tempOuts.clear();
+		if (this->ifs.at(i)->get_outputs().size() == 1) {
+			tempOuts = this->ifs.at(i)->get_outputs();
+			tempOuts.push_back(this->ifs.at(i)->get_deleted());
+			this->ifs.at(i)->set_outputs(tempOuts);
+		}
+	}
 	for (int i = 1; i <= this->latency; i++) {
 		numStates = numStates + ifCount;
 		statesPerL.push_back(ifCount);
@@ -1312,34 +1328,175 @@ void Netlist::populate() {
 		tempOps.clear();
 		for (int i = 0; i < (int)this->logics.size(); i++) {
 			if (this->logics.at(i)->get_timeASAP() == this->states.at(statePos)->get_latency()) {
-				tempOps.push_back(this->logics.at(i));
+				if (this->logics.at(i)->get_branchDep().size() == 0) {
+					tempOps.push_back(this->logics.at(i));
+				}
 			}
 		}
 		this->states.at(statePos)->set_operations(tempOps);
 	}
-	int test = 1;
-}
-/*	for (int i = 1; i <= numTrans; i++) {
-		this->transitions.push_back(new Transition(i - 1, i, ""));
+
+	int ifStateCount = 1;
+	Connector* tempCondition;
+	std::vector<Connector*> tempConditions = {};
+
+	// cycle through each latency level
+	for (int level = 1; level < this->latency; level++) {
+
+		// cycle through each state
+		for (int evalState = 0; evalState < this->states.size(); evalState++) {
+
+			// check if that state is located in the current latency level
+			if ((int)this->states.at(evalState)->get_latency() == level) {
+				if (this->states.at(evalState)->get_operations().size() == 0) {
+					tempConditions = this->states.at(evalState)->get_conditions();
+
+					// assign evalState+ifCount the current attribute as evalState
+					// but make sure it is not empty
+					if (tempConditions.size() > 0 && this->states.at(evalState + ifStateCount)->get_lockCond() == false) {
+						this->states.at(evalState + ifStateCount)->set_conditions(tempConditions);
+					}
+				}
+				// check if that state has an IF operation and that the condition dependencies match
+				for (int i = 0; i < this->states.at(evalState)->get_operations().size(); i++) {
+					if (this->states.at(evalState)->get_operations().at(i)->get_type() == "if") {
+
+						// fetch the conditions of the if statement
+						for (int j = 0; j < this->states.at(evalState)->get_operations().at(i)->get_outputs().size(); j++) {
+							tempCondition = this->states.at(evalState)->get_operations().at(i)->get_outputs().at(j);
+							tempConditions = this->states.at(evalState)->get_conditions();
+							this->states.at(evalState + ifStateCount + j)->set_conditions(tempConditions);
+							this->states.at(evalState + ifStateCount + j)->add_condition(tempCondition);
+							this->states.at(evalState + ifStateCount + j)->set_lockCond(true);
+
+							// loop through all of the logics and check if that logic has a latency = level + 1
+							// and check against the condition that was just added
+							// if all of those attributes match, add that operation to that state
+							tempOps.clear();
+							for (int k = 0; k < (int)this->logics.size(); k++) {
+								if (this->logics.at(k)->get_timeASAP() == level + 1) {
+									if (this->logics.at(k)->get_branchDep().size() == 0) {
+										tempOps.push_back(this->logics.at(k));
+									}
+									else if (this->logics.at(k)->get_branchDep() == this->states.at(evalState + ifStateCount + j)->get_conditions()) {
+										tempOps.push_back(this->logics.at(k));
+									}
+								}
+							}
+							this->states.at(evalState + ifStateCount + j)->set_operations(tempOps);
+						}
+						ifStateCount++;
+					}
+					else {
+						// fetch the conditions of evalState
+						tempConditions = this->states.at(evalState)->get_conditions();
+
+						// assign evalState+ifCount the current attribute as evalState
+						// but make sure it is not empty
+						if (tempConditions.size() > 0 && this->states.at(evalState + ifStateCount)->get_lockCond() == false) {
+							this->states.at(evalState + ifStateCount)->set_conditions(tempConditions);
+						}
+					}
+				}
+			}
+		}
 	}
-	std::vector<Logic*> tempOps;
-	std::vector<Transition*> tempIns;
-	std::vector<Transition*> tempOuts;
-	for (int layer = 1; layer <= numStates; layer++) {
-		tempOps.clear(); tempIns.clear(); tempOuts.clear();
+	for (int statePos = 0; statePos < (int)this->states.size(); statePos++) {
+		tempOps.clear();
 		for (int i = 0; i < (int)this->logics.size(); i++) {
-			if (this->logics.at(i)->get_timeASAP() == layer) {
-				tempOps.push_back(this->logics.at(i));
+			if (this->logics.at(i)->get_timeASAP() == this->states.at(statePos)->get_latency()) {
+				bool disGoHereGoodGood = true;
+				if (this->states.at(statePos)->get_conditions().size() < this->logics.at(i)->get_branchDep().size()) {
+					disGoHereGoodGood = false;
+				}
+				else {
+					for (int j = 0; j < (int)this->logics.at(i)->get_branchDep().size(); j++) {
+						if (this->logics.at(i)->get_branchDep().at(j) != this->states.at(statePos)->get_conditions().at(j)) {
+							disGoHereGoodGood = false;
+						}
+					}
+				}
+				if (disGoHereGoodGood == true) {
+					tempOps.push_back(this->logics.at(i));
+				}
 			}
 		}
-		for (int i = 0; i < (int)this->transitions.size(); i++) {
-			if (this->transitions.at(i)->get_dst() == layer) {
-				tempIns.push_back(this->transitions.at(i));
-			}
-			if (this->transitions.at(i)->get_src() == layer) {
-				tempOuts.push_back(this->transitions.at(i));
-			}
-		}
-		this->states.push_back(new State(layer, tempIns, tempOuts, tempOps));
+		this->states.at(statePos)->set_operations(tempOps);
 	}
-	*/
+	int ifCountDracula = 1;
+	std::vector<Transition*> tempTrans;
+	std::vector<Transition*> tempOther;
+	for (int evalState = 0; evalState < (int)this->states.size(); evalState++) {
+		tempTrans.clear(); tempOther.clear();
+		if (this->states.at(evalState)->get_latency() == this->latency) {
+			this->transitions.push_back(new Transition(evalState + 1, this->latency + 2));
+			tempTrans.push_back(this->transitions.back());
+			this->states.at(evalState)->set_outputTransitions(tempTrans);
+		}
+		else {
+			bool ifInState = false;
+			for (int evalOp = 0; evalOp < (int)this->states.at(evalState)->get_operations().size(); evalOp++) {
+				if (this->states.at(evalState)->get_operations().at(evalOp)->get_type() == "if") {
+					ifInState = true;
+				}
+			}
+			if (ifInState == true) {
+				this->transitions.push_back(new Transition(evalState+1, evalState+1 + ifCountDracula));
+				tempTrans.push_back(this->transitions.back());
+				this->states.at(evalState + ifCountDracula)->set_inputTransitions(tempTrans);
+				this->transitions.push_back(new Transition(evalState+1, evalState+1 + ifCountDracula + 1));
+				tempOther.push_back(this->transitions.back());
+				this->states.at(evalState + ifCountDracula + 1)->set_inputTransitions(tempOther);
+				tempTrans.push_back(this->transitions.back());
+				this->states.at(evalState)->set_outputTransitions(tempTrans);
+				ifCountDracula++;
+			}
+			else {
+				this->transitions.push_back(new Transition(evalState+1, evalState+1 + ifCountDracula));
+				tempTrans.push_back(this->transitions.back());
+				this->states.at(evalState)->set_outputTransitions(tempTrans);
+				this->states.at(evalState + ifCountDracula)->set_inputTransitions(tempTrans);
+			}
+		}
+	}
+	bool merged = true;
+	int mergeCount = 0;
+	std::vector<State*> statesInLat;
+	int tempLat = this->latency;
+	while(tempLat > 0 && merged) {
+		mergeCount = 0;
+		statesInLat.clear();
+		for (int i = 0; i < (int)this->states.size(); i++) {
+			if (this->states.at(i)->get_latency() == tempLat) {
+				statesInLat.push_back(this->states.at(i));
+			}
+		}
+		for (int i = 0; i < (int)statesInLat.size(); i++) {
+			for (int j = i + 1; j < (int)statesInLat.size(); j++) {
+				if (statesInLat.at(i)->get_operations().size() == statesInLat.at(j)->get_operations().size()) {
+					bool opsGoodGood = true;
+					for (int k = 0; k < (int)statesInLat.at(i)->get_operations().size(); k++) {
+						if (statesInLat.at(i)->get_operations().at(k) != statesInLat.at(j)->get_operations().at(k)) {
+							opsGoodGood = false;
+						}
+					}
+					if (opsGoodGood) {
+						if (statesInLat.at(i)->get_outputTransitions().at(0)->get_dst() == statesInLat.at(j)->get_outputTransitions().at(0)->get_dst()) {
+							statesInLat.at(j)->get_inputTransitions().at(0)->set_dst(statesInLat.at(i)->get_name());
+							for (int k = 0; k < (int)this->states.size(); k++) {
+								if (this->states.at(k) == statesInLat.at(j)) {
+									this->states.erase(this->states.begin() + k);
+								}
+							}
+							mergeCount++;
+						}
+					}
+				}
+			}
+		}
+		if (mergeCount == 0) {
+			merged = false;
+		}
+		tempLat--;
+	}
+}

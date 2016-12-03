@@ -17,17 +17,19 @@ class State;
 class Transition{
 	public:
 		// Constructor
-		Transition(int src, int dst, std::string condition);
+		Transition(int src, int dst);
 
 		//insert getters and setters
 		int get_src() { return this->src; }
 		int get_dst() { return this->dst; }
-		std::string get_condition() { return this->condition; }
+		//std::string get_condition() { return this->condition; }
+
+		void set_dst(int dst) { this->dst = dst; }
 
 	private:
 		int src;
 		int dst;
-		std::string condition;
+		//std::string condition;
 };
 
 #endif

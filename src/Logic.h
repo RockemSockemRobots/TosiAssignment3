@@ -16,7 +16,7 @@ Logic.h
 
 class Logic {
 	public:
-		Logic(std::string type, std::string name, std::vector<Connector*> inputs, std::vector<Connector*> outputs, bool sign, int delay, std::string outType, int timeASAP, int timeALAP, std::string typeSymbol);
+		Logic(std::string type, std::string name, std::vector<Connector*> inputs, std::vector<Connector*> outputs, bool sign, int delay, std::string outType, int timeASAP, int timeALAP, std::string typeSymbol, std::vector<Connector*> branchDep);
 		//Get
 		std::string get_type() { return this->type; }
 		std::string get_name() { return this->name; }
@@ -39,6 +39,9 @@ class Logic {
 		std::vector<double> get_selfForces() { return this->selfForces; }
 		std::vector<double> get_totsForces() { return this->totsForces; }
 
+		std::vector<Connector*> get_branchDep() { return this->branchDep; }
+		Connector* get_deleted() { return this->deleted; }
+
 		//Set
 		void set_type(std::string type) { this->type = type; }
 		void set_name(std::string name) { this->name = name; }
@@ -47,6 +50,7 @@ class Logic {
 		void set_outType(std::string outType) { this->outType = outType; }
 
 		void set_outputs(std::vector<Connector*> outputs) { this->outputs = outputs; }
+		void set_deleted(Connector* deleted) { this->deleted = deleted; }
 
 		void set_timeASAP(int timeASAP) { this->timeASAP = timeASAP; }
 		void set_timeALAP(int timeALAP) { this->timeALAP = timeALAP; }
@@ -77,5 +81,7 @@ class Logic {
 		std::vector<double> selfForces;
 		std::vector<double> totsForces;
 		std::string typeSymbol;
+		std::vector<Connector*> branchDep;
+		Connector* deleted;
 };
 #endif
